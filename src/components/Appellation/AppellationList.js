@@ -1,13 +1,7 @@
 import React, { useState } from "react";
 import { createAppellation, deleteAppellation } from "../../api/appellationApi";
 
-import Box from "@mui/material/Box";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import Stack from "@mui/material/Stack";
+import { Box, List, ListItem, ListItemText, Button, CircularProgress } from "@mui/material";
 
 import AppellationCreateForm from "./AppellationCreateForm";
 
@@ -79,6 +73,7 @@ function AppellationList({ appellations, onAppellationChanged }) {
         onSubmit={handleCreate}
         appellationForm={appellationForm}
         onChange={setAppellationForm}
+        adding={adding}
       />
     </Box>
   );

@@ -1,43 +1,84 @@
-import { Box, List, Typography, Divider } from "@mui/material";
-import React from "react";
+import { Box, List, Typography, Divider, Collapse, IconButton } from "@mui/material";
+import React, { useState } from "react";
 import BottleItem from "./BottleItem";
+import { ExpandMore, ExpandLess } from "@mui/icons-material";
 
 function BottleList({ bottles, isMobile, ...editHandlers }) {
+  // 行ごとにボトルをグループ化
+  const rowGroups = bottles.reduce((acc, bottle) => {
+    const row = bottle.row_number;
+    if (!acc[row]) acc[row] = [];
+    acc[row].push(bottle);
+    return acc;
+  }, {});
+
+  const sortedRows = Object.keys(rowGroups).sort((a, b) => Number(a) - Number(b));
+
+  // 折りたたみ状態
+  const [openRows, setOpenRows] = useState(() =>
+    Object.fromEntries(sortedRows.map((row) => [row, true])) // 全て開いた状態で初期化
+  );
+
+  const toggleRow = (row) => {
+    setOpenRows((prev) => ({ ...prev, [row]: !prev[row] }));
+  };
   if (bottles.length === 0) {
     return <Typography>登録されているボトルはありません。</Typography>;
   }
 
-  const sorted = [...bottles].sort(
-    (a, b) =>
-      Number(a.row_number) - Number(b.row_number) ||
-      Number(a.column_number) - Number(b.column_number),
-  );
-
-  let prevRow = null;
-  let groupColor = false;
-
   return (
     <List>
-      {sorted.map((bottle) => {
-        const rowChanged = prevRow !== null && prevRow !== bottle.row_number;
-        if (rowChanged) groupColor = !groupColor;
-        prevRow = bottle.row_number;
-
+      {sortedRows.map((row, index) => {
+        const bottlesInRow = rowGroups[row];
+        const groupColor = index % 2 === 0 ? "#f5f5f5" : "#fff";
         return (
-          <React.Fragment key={bottle.id}>
-            {rowChanged && <Divider sx={{ my: 1 }} />}
+          <React.Fragment key={row}>
+            <Divider sx={{ my: 1 }} />
+            {/* 行ヘッダー */}
             <Box
               sx={{
-                background: groupColor ? "#f5f5f5" : "#fff",
-                borderRadius: 2,
-                mb: 1,
-                px: isMobile ? 0.5 : 1,
-                py: isMobile ? 0.5 : 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                px: 1,
+                py: 0.5,
+                background: groupColor,
+                borderRadius: 1,
                 cursor: "pointer",
               }}
+              onClick={() => toggleRow(row)}
             >
-              <BottleItem bottle={bottle} {...editHandlers} />
+              <Typography variant="subtitle1">{row}段目 ({bottlesInRow.length}本）</Typography>
+              <IconButton size="small">
+                {openRows[row] ? <ExpandLess /> : <ExpandMore />}
+              </IconButton>
             </Box>
+
+            {/* 折りたたみ本体 */}
+            <Collapse in={openRows[row]} timeout="auto" unmountOnExit>
+              {rowGroups[row]
+                .sort((a, b) => Number(a.column_number) - Number(b.column_number))
+                .map((bottle) => (
+                  <Box
+                    key={bottle.id}
+                    sx={{
+                      background: groupColor,
+                      borderRadius: 2,
+                      mb: 1,
+                      mx: 1,
+                      px: isMobile ? 0.5 : 1,
+                      py: isMobile ? 0.5 : 1,
+                      cursor: "pointer",
+                      transition: "background 0.2s",
+                      "&:hover": {
+                        background: "#e0e0e0",
+                      },
+                    }}
+                  >
+                    <BottleItem bottle={bottle} {...editHandlers} />
+                  </Box>
+                ))}
+            </Collapse>
           </React.Fragment>
         );
       })}

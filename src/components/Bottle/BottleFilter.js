@@ -19,13 +19,6 @@ function BottleFilter({
     setFilterOpened("");
   };
 
-  const types = [
-    ...new Set(bottles.map((b) => b.wine?.wine_type_name).filter(Boolean)),
-  ];
-  const countries = [
-    ...new Set(bottles.map((b) => b.wine?.country_name).filter(Boolean)),
-  ];
-
   return (
     <Stack direction={isMobile ? "column" : "row"} spacing={2} sx={{ mb: 2 }}>
       <TextField
@@ -101,12 +94,7 @@ function BottleFilter({
         variant="outlined"
         color="inherit"
         fullWidth={isMobile}
-        onClick={() => {
-          setFilterType("");
-          setFilterCountry("");
-          setFilterRow("");
-          setFilterOpened("");
-        }}
+        onClick={resetFilters}
         sx={{ mb: isMobile ? 1 : 0 }}
       >
         フィルター解除
