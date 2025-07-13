@@ -1,0 +1,100 @@
+import React from "react";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import MenuItem from "@mui/material/MenuItem";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+
+function BottleCreateForm({
+  form,
+  wines,
+  creating,
+  onChange,
+  onSubmit,
+  hideWineSelect = false,
+  showSubmitButton = true,
+}) {
+  const inputFontSize = { xs: 13, sm: 16 };
+
+  return (
+    <Box
+      component="form"
+      onSubmit={onSubmit}
+      sx={{ p: 2, border: "1px solid #ccc", borderRadius: 2, minWidth: 320 }}
+    >
+      <Typography variant="h6" gutterBottom sx={{ fontSize: inputFontSize }}>
+        ボトル追加
+      </Typography>
+      <Stack spacing={2}>
+        {/* ワイン選択欄（必要な場合のみ） */}
+        {!hideWineSelect && (
+          <TextField
+            select
+            label="ワイン"
+            value={form.wine_id}
+            onChange={(e) => onChange({ ...form, wine_id: e.target.value })}
+            required
+            size="small"
+            InputProps={{ sx: { fontSize: inputFontSize } }}
+            InputLabelProps={{ sx: { fontSize: inputFontSize } }}
+          >
+            <MenuItem value="" sx={{ fontSize: inputFontSize }}>
+              選択してください
+            </MenuItem>
+            {wines.map((wine) => (
+              <MenuItem
+                key={wine.id}
+                value={wine.id}
+                sx={{ fontSize: inputFontSize }}
+              >
+                {wine.name} {wine.vintage && `- ${wine.vintage}`}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+        <TextField
+          label="棚 行"
+          type="number"
+          value={form.row_number}
+          onChange={(e) => onChange({ ...form, row_number: e.target.value })}
+          required
+          size="small"
+          InputProps={{ sx: { fontSize: inputFontSize } }}
+          InputLabelProps={{ sx: { fontSize: inputFontSize } }}
+        />
+        <TextField
+          label="棚 列"
+          type="number"
+          value={form.column_number}
+          onChange={(e) => onChange({ ...form, column_number: e.target.value })}
+          required
+          size="small"
+          InputProps={{ sx: { fontSize: inputFontSize } }}
+          InputLabelProps={{ sx: { fontSize: inputFontSize } }}
+        />
+        <TextField
+          label="メモ"
+          value={form.note}
+          size="small"
+          onChange={(e) => onChange({ ...form, note: e.target.value })}
+          InputProps={{ sx: { fontSize: inputFontSize } }}
+          InputLabelProps={{ sx: { fontSize: inputFontSize } }}
+        />
+        {showSubmitButton && (
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={creating}
+            sx={{ fontSize: inputFontSize }}
+          >
+            {creating ? "追加中..." : "追加"}
+          </Button>
+        )}
+      </Stack>
+    </Box>
+  );
+}
+
+export default BottleCreateForm;
