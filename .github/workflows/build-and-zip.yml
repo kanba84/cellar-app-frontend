@@ -57,34 +57,29 @@ jobs:
       - name: Determine release version
         id: determine_version
         run: |
-          # Extract version from PR title or calculate from commit messages
-          if [[ "${{ github.event.pull_request.title }}" =~ ([0-9]+\.[0-9]+\.[0-9]+) ]]; then
-            echo "version=${BASH_REMATCH[1]}" >> $GITHUB_ENV
-          else
-            TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.1.0")
-            if [ "$TAG" = "" ]; then
-              TAG="0.1.0"
-            fi
-            if git log -1 --pretty=%B | grep -q '^feat'; then
-              echo "version=$(echo $TAG | awk -F. '{print $1"."$2+1".0"}')" >> $GITHUB_ENV
-            elif git log -1 --pretty=%B | grep -q '^fix'; then
-              echo "version=$(echo $TAG | awk -F. '{print $1"."$2"."$3+1}')" >> $GITHUB_ENV
-            else
-              echo "version=$TAG" >> $GITHUB_ENV
-            fi
+          # mainブランチへのpush時は常にパッチバージョンを1つ上げる
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.1.0")
+          if [ "$TAG" = "" ]; then
+            TAG="0.1.0"
           fi
+          MAJOR=$(echo $TAG | cut -d. -f1)
+          MINOR=$(echo $TAG | cut -d. -f2)
+          PATCH=$(echo $TAG | cut -d. -f3)
+          PATCH=$((PATCH+1))
+          echo "version=$MAJOR.$MINOR.$PATCH" >> $GITHUB_ENV
 
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: create_release
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ env.version }}
-          release_name: Release v${{ env.version }}
+          name: Release v${{ env.version }}
           body: |
             Automated release for version v${{ env.version }}.
           draft: false
           prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload build artifact to release
         uses: actions/upload-release-asset@v1
