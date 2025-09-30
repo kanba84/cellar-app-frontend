@@ -1,0 +1,89 @@
+name: Build, Zip, and Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build, Zip, and Release React App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the React app
+        run: npm run build
+
+      - name: Archive build output
+        run: |
+          zip -r build-artifact.zip build/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifact
+          path: build-artifact.zip
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifact
+
+      - name: Determine release version
+        id: determine_version
+        run: |
+          # Extract version from PR title or calculate from commit messages
+          if [[ "${{ github.event.pull_request.title }}" =~ ([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            echo "version=${BASH_REMATCH[1]}" >> $GITHUB_ENV
+          else
+            # Example: Calculate version based on commit messages (simplified logic)
+            if git log -1 --pretty=%B | grep -q '^feat'; then
+              echo "version=$(git describe --tags --abbrev=0 | awk -F. '{print $1"."$2+1".0"}')" >> $GITHUB_ENV
+            elif git log -1 --pretty=%B | grep -q '^fix'; then
+              echo "version=$(git describe --tags --abbrev=0 | awk -F. '{print $1"."$2"."$3+1}')" >> $GITHUB_ENV
+            else
+              echo "version=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+            fi
+          fi
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.version }}
+          release_name: Release v${{ env.version }}
+          body: |
+            Automated release for version v${{ env.version }}.
+          draft: false
+          prerelease: false
+
+      - name: Upload build artifact to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build-artifact.zip
+          asset_name: build-artifact.zip
+          asset_content_type: application/zip
