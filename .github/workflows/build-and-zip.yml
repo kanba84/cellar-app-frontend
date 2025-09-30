@@ -1,4 +1,9 @@
+
 name: Build, Zip, and Release
+
+permissions:
+  contents: write
+  pull-requests: read
 
 on:
   push:
@@ -56,13 +61,16 @@ jobs:
           if [[ "${{ github.event.pull_request.title }}" =~ ([0-9]+\.[0-9]+\.[0-9]+) ]]; then
             echo "version=${BASH_REMATCH[1]}" >> $GITHUB_ENV
           else
-            # Example: Calculate version based on commit messages (simplified logic)
+            TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.1.0")
+            if [ "$TAG" = "" ]; then
+              TAG="0.1.0"
+            fi
             if git log -1 --pretty=%B | grep -q '^feat'; then
-              echo "version=$(git describe --tags --abbrev=0 | awk -F. '{print $1"."$2+1".0"}')" >> $GITHUB_ENV
+              echo "version=$(echo $TAG | awk -F. '{print $1"."$2+1".0"}')" >> $GITHUB_ENV
             elif git log -1 --pretty=%B | grep -q '^fix'; then
-              echo "version=$(git describe --tags --abbrev=0 | awk -F. '{print $1"."$2"."$3+1}')" >> $GITHUB_ENV
+              echo "version=$(echo $TAG | awk -F. '{print $1"."$2"."$3+1}')" >> $GITHUB_ENV
             else
-              echo "version=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+              echo "version=$TAG" >> $GITHUB_ENV
             fi
           fi
 
