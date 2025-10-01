@@ -14,16 +14,18 @@ function BottleList({ bottles, isMobile, ...editHandlers }) {
 
   const sortedRows = Object.keys(rowGroups).sort((a, b) => Number(a) - Number(b));
 
+
   // 折りたたみ状態
-  const [openRows, setOpenRows] = useState(() => {
-    // sessionStorageから状態を読み込む
+  const [openRows, setOpenRows] = useState(() =>
+    Object.fromEntries(sortedRows.map((row) => [row, true])) // 全て開いた状態で初期化
+  );
+
+  React.useEffect(() => {
     const savedState = sessionStorage.getItem('bottleListOpenRows');
     if (savedState) {
-      return JSON.parse(savedState);
+      setOpenRows(JSON.parse(savedState));
     }
-    // 保存された状態がない場合は全て開いた状態で初期化
-    return Object.fromEntries(sortedRows.map((row) => [row, true]));
-  });
+  }, [sortedRows]);
 
   const toggleRow = (row) => {
     setOpenRows((prev) => {
