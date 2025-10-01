@@ -1,4 +1,3 @@
-
 name: Build, Zip, and Release
 
 permissions:
@@ -53,6 +52,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifact
+          path: .
 
       - name: Determine release version
         id: determine_version
@@ -68,8 +68,7 @@ jobs:
           PATCH=$((PATCH+1))
           echo "version=$MAJOR.$MINOR.$PATCH" >> $GITHUB_ENV
 
-      - name: Create GitHub Release
-        id: create_release
+      - name: Create GitHub Release with Asset
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ env.version }}
@@ -78,15 +77,6 @@ jobs:
             Automated release for version v${{ env.version }}.
           draft: false
           prerelease: false
+          files: build-artifact.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload build artifact to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build-artifact.zip
-          asset_name: build-artifact.zip
-          asset_content_type: application/zip
