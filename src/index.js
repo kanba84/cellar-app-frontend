@@ -6,6 +6,7 @@ import App from "./App";
 import { initAxiosClient } from "./api/axiosClient";
 import reportWebVitals from "./reportWebVitals";
 
+
 initAxiosClient().then(() => {
   const root = ReactDOM.createRoot(document.getElementById("root"));
   root.render(

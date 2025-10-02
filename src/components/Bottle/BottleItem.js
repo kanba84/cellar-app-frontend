@@ -8,6 +8,8 @@ import Box from "@mui/material/Box";
 import Switch from "@mui/material/Switch";
 import wineTypeColor from "../../utils/wineUtils";
 import { useNavigate } from "react-router-dom";
+import "flag-icons/css/flag-icons.min.css";
+
 
 function BottleItem({
   bottle,
@@ -39,7 +41,7 @@ function BottleItem({
       alignItems="flex-start"
       sx={{ mb: 2, bgcolor: itemBgColor, borderRadius: 2, boxShadow: 1 }}
     >
-      <Box width="100%">
+      <Box width="100%" sx={{ position: "relative" }}>
         <Typography
           fontWeight="bold"
           sx={{ color: nameColor }}
@@ -181,6 +183,21 @@ function BottleItem({
             </>
           )}
         </Stack>
+        {/* 国旗アイコン（右下に表示） */}
+        {bottle.wine?.country_iso_code && (
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 8,
+              right: 8,
+            }}
+          >
+            <span
+              className={`fi fi-${bottle.wine.country_iso_code.toLowerCase()}`}
+              style={{ fontSize: "24px", borderRadius: "4px" }}
+            ></span>
+          </Box>
+        )}
       </Box>
     </ListItem>
   );
