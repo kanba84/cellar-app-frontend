@@ -5,26 +5,21 @@ permissions:
   pull-requests: read
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     types: [closed]
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    # PR がマージされているか、または main push の場合のみ実行
-    if: >
-      github.event_name == 'push' || 
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    # PR が merged=true の場合のみ実行
+    if: github.event.pull_request.merged == true
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # ← 過去のコミット & タグをすべて取得
-          fetch-tags: true # ← タグも必ず取得
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -43,8 +38,17 @@ jobs:
       - name: Determine release version
         id: determine_version
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            # main への直接 push の場合はパッチバージョン +1
+          TITLE="${{ github.event.pull_request.title }}"
+          if [[ "$TITLE" =~ v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+          elif [[ "$TITLE" =~ ^feat ]]; then
+            TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.1.0")
+            MAJOR=$(echo $TAG | cut -d. -f1)
+            MINOR=$(echo $TAG | cut -d. -f2)
+            MINOR=$((MINOR+1))
+            PATCH=0
+            VERSION="$MAJOR.$MINOR.$PATCH"
+          elif [[ "$TITLE" =~ ^fix ]]; then
             TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.1.0")
             MAJOR=$(echo $TAG | cut -d. -f1)
             MINOR=$(echo $TAG | cut -d. -f2)
@@ -52,42 +56,17 @@ jobs:
             PATCH=$((PATCH+1))
             VERSION="$MAJOR.$MINOR.$PATCH"
           else
-            # PR マージの場合はタイトルからバージョン取得
-            TITLE="${{ github.event.pull_request.title }}"
-            if [[ "$TITLE" =~ v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
-              VERSION="${BASH_REMATCH[1]}"
-            else
-              # conventional commit 判定 (feat/fix/patch)
-              if [[ "$TITLE" =~ ^feat ]]; then
-                TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.1.0")
-                MAJOR=$(echo $TAG | cut -d. -f1)
-                MINOR=$(echo $TAG | cut -d. -f2)
-                MINOR=$((MINOR+1))
-                PATCH=0
-                VERSION="$MAJOR.$MINOR.$PATCH"
-              elif [[ "$TITLE" =~ ^fix ]]; then
-                TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.1.0")
-                MAJOR=$(echo $TAG | cut -d. -f1)
-                MINOR=$(echo $TAG | cut -d. -f2)
-                PATCH=$(echo $TAG | cut -d. -f3)
-                PATCH=$((PATCH+1))
-                VERSION="$MAJOR.$MINOR.$PATCH"
-              else
-                # 判定できなければパッチ +1
-                TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.1.0")
-                MAJOR=$(echo $TAG | cut -d. -f1)
-                MINOR=$(echo $TAG | cut -d. -f2)
-                PATCH=$(echo $TAG | cut -d. -f3)
-                PATCH=$((PATCH+1))
-                VERSION="$MAJOR.$MINOR.$PATCH"
-              fi
-            fi
+            TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.1.0")
+            MAJOR=$(echo $TAG | cut -d. -f1)
+            MINOR=$(echo $TAG | cut -d. -f2)
+            PATCH=$(echo $TAG | cut -d. -f3)
+            PATCH=$((PATCH+1))
+            VERSION="$MAJOR.$MINOR.$PATCH"
           fi
           echo "version=$VERSION" >> $GITHUB_ENV
           echo "Determined release version: $VERSION"
 
-      - name: Create GitHub Release
-        id: create_release
+      - name: Create GitHub Release with asset
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ env.version }}
@@ -96,15 +75,6 @@ jobs:
             Automated release for version v${{ env.version }}.
           draft: false
           prerelease: false
-          push: true   # リポジトリにタグも push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload build artifact
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ env.version }}
-          name: build-artifact.zip
-          asset_path: build-artifact.zip
+          files: build-artifact.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
