@@ -43,6 +43,7 @@ jobs:
             VERSION="${BASH_REMATCH[1]}"
           elif [[ "$TITLE" =~ ^feat ]]; then
             TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.1.0")
+            TAG=${TAG#v}  # ← 先頭vを削除
             MAJOR=$(echo $TAG | cut -d. -f1)
             MINOR=$(echo $TAG | cut -d. -f2)
             MINOR=$((MINOR+1))
