@@ -23,9 +23,14 @@ function BottleList({ bottles, isMobile, ...editHandlers }) {
   React.useEffect(() => {
     const savedState = sessionStorage.getItem('bottleListOpenRows');
     if (savedState) {
-      setOpenRows(JSON.parse(savedState));
+      const parsed = JSON.parse(savedState);
+      const normalized = Object.fromEntries(
+        Object.entries(parsed).map(([row, val]) => [row, Boolean(val)])
+      );
+      setOpenRows(normalized);
     }
-  }, [sortedRows]);
+  }, []); // 空配列でマウント時のみ実行
+
 
   const toggleRow = (row) => {
     setOpenRows((prev) => {
