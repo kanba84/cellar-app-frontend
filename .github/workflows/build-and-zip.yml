@@ -66,10 +66,10 @@ jobs:
       - name: Create GitHub Release with asset
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ env.version }}
-          name: Release v${{ env.version }}
+          tag_name: ${{ env.version }}
+          name: Release ${{ env.version }}
           body: |
-            Automated release for version v${{ env.version }}.
+            Automated release for version ${{ env.version }}.
           draft: false
           prerelease: false
           files: build-artifact.zip
