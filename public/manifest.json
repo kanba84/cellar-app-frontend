@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Cellar App",
+  "name": "Cellar App - Manage Your Wine Collection",
   "icons": [
     {
       "src": "favicon.ico",
