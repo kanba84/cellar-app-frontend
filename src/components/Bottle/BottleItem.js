@@ -27,6 +27,7 @@ function BottleItem({
 
   // 開封状態を即時反映するためのハンドラ
   const handleOpenedToggle = (e) => {
+    e.stopPropagation(); // イベントの伝播を停止
     // 編集中ならeditFormを、そうでなければis_openedのみ送信
     if (editId === bottle.id) {
       onEditChange({ ...editForm, is_opened: e.target.checked });
@@ -70,9 +71,11 @@ function BottleItem({
                 type="number"
                 size="small"
                 value={editForm.row_number}
-                onChange={(e) =>
-                  onEditChange({ ...editForm, row_number: e.target.value })
-                }
+                onChange={(e) => {
+                  e.stopPropagation();
+                  onEditChange({ ...editForm, row_number: e.target.value });
+                }}
+                onClick={(e) => e.stopPropagation()}
                 sx={{ width: 80 }}
               />
               <TextField
@@ -80,9 +83,11 @@ function BottleItem({
                 type="number"
                 size="small"
                 value={editForm.column_number}
-                onChange={(e) =>
-                  onEditChange({ ...editForm, column_number: e.target.value })
-                }
+                onChange={(e) => {
+                  e.stopPropagation();
+                  onEditChange({ ...editForm, column_number: e.target.value });
+                }}
+                onClick={(e) => e.stopPropagation()}
                 sx={{ width: 80 }}
               />
             </>
@@ -135,7 +140,10 @@ function BottleItem({
                 variant="contained"
                 color="primary"
                 size="small"
-                onClick={() => onEditSave(bottle.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditSave(bottle.id);
+                }}
               >
                 保存
               </Button>
@@ -143,7 +151,10 @@ function BottleItem({
                 variant="outlined"
                 color="inherit"
                 size="small"
-                onClick={onEditCancel}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditCancel();
+                }}
               >
                 キャンセル
               </Button>
