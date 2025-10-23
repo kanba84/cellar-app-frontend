@@ -40,100 +40,99 @@ function BottleItem({
   return (
     <ListItem
       alignItems="flex-start"
-      sx={{ mb: 2, bgcolor: itemBgColor, borderRadius: 2, boxShadow: 1 }}
+      sx={{
+        mb: 2,
+        bgcolor: itemBgColor,
+        borderRadius: 2,
+        boxShadow: 1,
+        flexDirection: "column", // ← 下段を作るため縦方向
+      }}
     >
-      <Box width="100%" sx={{ position: "relative" }}>
-        <Typography
-          fontWeight="bold"
-          sx={{ color: nameColor }}
-          onClick={() => {
-            if (bottle.wine?.id) {
-              navigate(`/wines/${bottle.wine.id}`);
-            }
+      {/* 上段：画像＋ワイン情報 */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "flex-start",
+          width: "100%",
+        }}
+      >
+        {/* ① サムネイル画像 */}
+        <Box
+          component="img"
+          src="https://192.168.11.26/labels/sample_thumbnail.png"
+          alt={`${bottle.wine?.name} ラベル`}
+          sx={{
+            width: 100,
+            height: "auto",
+            borderRadius: 2,
+            boxShadow: 1,
+            mr: 2,
+            objectFit: "cover",
           }}
-        >
-          {bottle.wine?.name || "ワイン名不明"}
-          {bottle.wine?.vintage && <>（{bottle.wine.vintage}年）</>}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          タイプ: {bottle.wine?.wine_type_name || "-"} / 生産国:{" "}
-          {bottle.wine?.country_name || "-"}
-          {bottle.wine?.region_name && <> / 地域: {bottle.wine.region_name}</>}
-          <br />
-          生産者: {bottle.wine?.producer || "-"}
-        </Typography>
-        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-          {/* 棚 行・列は編集時のみ入力可 */}
-          {editId === bottle.id ? (
-            <>
-              <TextField
-                label="棚 行"
-                type="number"
-                size="small"
-                value={editForm.row_number}
-                onChange={(e) => {
-                  e.stopPropagation();
-                  onEditChange({ ...editForm, row_number: e.target.value });
-                }}
-                onClick={(e) => e.stopPropagation()}
-                sx={{ width: 80 }}
-              />
-              <TextField
-                label="棚 列"
-                type="number"
-                size="small"
-                value={editForm.column_number}
-                onChange={(e) => {
-                  e.stopPropagation();
-                  onEditChange({ ...editForm, column_number: e.target.value });
-                }}
-                onClick={(e) => e.stopPropagation()}
-                sx={{ width: 80 }}
-              />
-            </>
-          ) : (
-            <Typography variant="body2">
-              棚位置: {bottle.row_number}行 {bottle.column_number}列
+        />
+
+        {/* ② ワイン情報 */}
+        <Box flex={1}>
+          <Typography
+            fontWeight="bold"
+            sx={{ color: nameColor, cursor: "pointer" }}
+            onClick={() => {
+              if (bottle.wine?.id) navigate(`/wines/${bottle.wine.id}`);
+            }}
+          >
+            {bottle.wine?.name || "ワイン名不明"}
+            {bottle.wine?.vintage && <>（{bottle.wine.vintage}年）</>}
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            タイプ: {bottle.wine?.wine_type_name || "-"} / 生産国:{" "}
+            {bottle.wine?.country_name || "-"}
+            {bottle.wine?.region_name && <> / 地域: {bottle.wine.region_name}</>}
+            <br />
+            生産者: {bottle.wine?.producer || "-"}
+          </Typography>
+
+          {bottle.note && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              メモ: {bottle.note}
             </Typography>
           )}
-          {/* トグルスイッチは常に表示・操作可能 */}
+        </Box>
+      </Box>
+
+      {/* 下段：ボトル状態 + 操作ボタン */}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{
+          width: "100%",
+          mt: 2,
+        }}
+      >
+        {/* 左側：開封状態など */}
+        <Stack direction="row" alignItems="center" spacing={1}>
           <Switch
             checked={
               editId === bottle.id ? editForm.is_opened : bottle.is_opened
             }
             onChange={handleOpenedToggle}
             color="primary"
-            inputProps={{ "aria-label": "開封状態トグル" }}
           />
           <Typography variant="body2">
-            開封:{" "}
+            開封:
             {(editId === bottle.id ? editForm.is_opened : bottle.is_opened)
               ? "済"
               : "未"}
           </Typography>
+          <Typography variant="body2">
+            追加日: {new Date(bottle.added_at).toLocaleDateString()}
+          </Typography>
         </Stack>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          追加日: {new Date(bottle.added_at).toLocaleDateString()}
-        </Typography>
-        {/* メモは編集時のみ入力可 */}
-        {editId === bottle.id ? (
-          <TextField
-            label="メモ"
-            size="small"
-            value={editForm.note}
-            onChange={(e) =>
-              onEditChange({ ...editForm, note: e.target.value })
-            }
-            sx={{ width: 250, mb: 1 }}
-          />
-        ) : (
-          bottle.note && (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              メモ: {bottle.note}
-            </Typography>
-          )
-        )}
-        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+
+        {/* 右側：ボタン群 */}
+        <Stack direction="row" spacing={1}>
           {editId === bottle.id ? (
             <>
               <Button
@@ -194,22 +193,7 @@ function BottleItem({
             </>
           )}
         </Stack>
-        {/* 国旗アイコン（右下に表示） */}
-        {bottle.wine?.country_iso_code && (
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: 8,
-              right: 8,
-            }}
-          >
-            <span
-              className={`fi fi-${bottle.wine.country_iso_code.toLowerCase()}`}
-              style={{ fontSize: "24px", borderRadius: "4px" }}
-            ></span>
-          </Box>
-        )}
-      </Box>
+      </Stack>
     </ListItem>
   );
 }
