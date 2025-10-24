@@ -39,38 +39,25 @@ function BottleItem({
   return (
     <ListItem
       alignItems="flex-start"
-      sx={{
-        mb: 2,
-        bgcolor: itemBgColor,
-        borderRadius: 2,
-        boxShadow: 1,
-        flexDirection: "column", // ← 下段を作るため縦方向
-      }}
+      sx={{ mb: 2, bgcolor: itemBgColor, borderRadius: 2, boxShadow: 1 }}
     >
-      {/* 上段：画像＋ワイン情報 */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "flex-start",
-          width: "100%",
-        }}
-      >
-        {/* ① サムネイル画像 */}
+    <Box width="100%">
+      <Stack direction="row" spacing={2} alignItems="flex-start">
+        {/* 左側：サムネイル画像 */}
         <Box
           component="img"
-          src={bottle.wine?.label_image_url || ""}
+          src={bottle.wine?.label_image_url || "/labels/sample_thumbnail.png"}
           alt={`${bottle.wine?.name} ラベル`}
           sx={{
             width: 100,
             height: "auto",
             borderRadius: 2,
             boxShadow: 1,
-            mr: 2,
-            objectFit: "cover",
+            flexShrink: 0,
           }}
         />
 
-        {/* ② ワイン情報 */}
+        {/* 右側：ワイン情報 */}
         <Box flex={1}>
           <Typography
             fontWeight="bold"
@@ -90,48 +77,42 @@ function BottleItem({
             <br />
             生産者: {bottle.wine?.producer || "-"}
           </Typography>
-
-          {bottle.note && (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              メモ: {bottle.note}
-            </Typography>
-          )}
         </Box>
-      </Box>
+      </Stack>
 
-      {/* 下段：ボトル状態 + 操作ボタン */}
+      {/* 下段：国旗 + 状態・操作エリア */}
       <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={2}
+        direction="row"
         alignItems="center"
         justifyContent="space-between"
-        sx={{
-          width: "100%",
-          mt: 2,
-        }}
+        sx={{ mt: 1 }}
       >
-        {/* 左側：開封状態など */}
-        <Stack direction="row" alignItems="center" spacing={1}>
+        {/* 国旗アイコン */}
+        {bottle.wine?.country_iso_code && (
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <span
+              className={`fi fi-${bottle.wine.country_iso_code.toLowerCase()}`}
+              style={{ fontSize: "24px", borderRadius: "4px" }}
+            ></span>
+          </Box>
+        )}
+
+        {/* ボトル状態・ボタンなど */}
+        <Stack direction="row" spacing={1} alignItems="center">
+          {/* ここにSwitchや変更/削除ボタンなどをそのまま残す */}
+          {/* 例： */}
           <Switch
-            checked={
-              editId === bottle.id ? editForm.is_opened : bottle.is_opened
-            }
+            checked={editId === bottle.id ? editForm.is_opened : bottle.is_opened}
             onChange={handleOpenedToggle}
             color="primary"
           />
           <Typography variant="body2">
-            開封:
+            開封:{" "}
             {(editId === bottle.id ? editForm.is_opened : bottle.is_opened)
               ? "済"
               : "未"}
           </Typography>
-          <Typography variant="body2">
-            追加日: {new Date(bottle.added_at).toLocaleDateString()}
-          </Typography>
-        </Stack>
 
-        {/* 右側：ボタン群 */}
-        <Stack direction="row" spacing={1}>
           {editId === bottle.id ? (
             <>
               <Button
@@ -155,14 +136,6 @@ function BottleItem({
                 }}
               >
                 キャンセル
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                size="small"
-                onClick={() => onDelete(bottle.id)}
-              >
-                削除
               </Button>
             </>
           ) : (
@@ -193,7 +166,8 @@ function BottleItem({
           )}
         </Stack>
       </Stack>
-    </ListItem>
+    </Box>
+  </ListItem>
   );
 }
 
