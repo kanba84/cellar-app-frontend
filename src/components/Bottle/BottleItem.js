@@ -58,7 +58,7 @@ function BottleItem({
         {/* ① サムネイル画像 */}
         <Box
           component="img"
-          src="https://192.168.11.26/labels/sample_thumbnail.png"
+          src={bottle.wine?.label_image_url || ""}
           alt={`${bottle.wine?.name} ラベル`}
           sx={{
             width: 100,
