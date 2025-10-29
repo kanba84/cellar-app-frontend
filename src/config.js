@@ -2,8 +2,20 @@ let config = null;
 
 export async function loadConfig() {
   if (!config) {
-    const res = await fetch("/config.json");
-    config = await res.json();
+    try {
+      // 本番環境ではビルド時に配置されたconfig.jsonを使用
+      const res = await fetch('/config.json');
+      if (!res.ok) {
+        throw new Error('Failed to load config.json');
+      }
+      config = await res.json();
+    } catch (error) {
+      console.error('Failed to load config:', error);
+      // デフォルトの設定をフォールバックとして使用
+      config = {
+        REACT_APP_API_BASE_URL: 'https://192.168.11.26:8443'
+      };
+    }
   }
   return config;
 }
