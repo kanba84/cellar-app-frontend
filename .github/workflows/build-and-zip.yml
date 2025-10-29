@@ -29,8 +29,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build React app
-        run: npm run build
+      - name: Build React app for production
+        run: npm run build:prod
 
       - name: Archive build output
         run: zip -r build-artifact.zip build/
