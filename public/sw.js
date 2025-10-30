@@ -8,16 +8,17 @@ const staticUrlsToCache = ['/', '/index.html', '/manifest.json'];
 let API_BASE_URL = '';
 
 // ビルド時に配置されたconfig.jsonを読み込む
-fetch('/config.json')
-  .then(response => response.json())
-  .then(config => {
-    API_BASE_URL = config.REACT_APP_API_BASE_URL;
-  })
-  .catch(error => {
-    console.error('Failed to load config:', error);
-    // デフォルトの設定をフォールバックとして使用
-    API_BASE_URL = 'https://192.168.11.26:8443';
-  });
+// fetch('/config.json')
+//   .then(response => response.json())
+//   .then(config => {
+//     API_BASE_URL = config.REACT_APP_API_BASE_URL;
+//   })
+//   .catch(error => {
+//     console.error('Failed to load config:', error);
+//     // デフォルトの設定をフォールバックとして使用
+//     API_BASE_URL = 'https://192.168.11.26:8443';
+//   });
+API_BASE_URL = 'https://192.168.11.26:8443';
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -37,6 +38,11 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(event.request)
         .then(response => {
+          // Safari対策: opaqueレスポンスやCORS失敗を弾く
+          if (!response || response.status !== 200 || response.type !== 'basic') {
+            console.warn('[SW] Skip caching API response:', response);
+            return response;
+          }
           // レスポンスのクローンを作成してキャッシュに保存
           const responseToCache = response.clone();
           caches.open(API_CACHE)
