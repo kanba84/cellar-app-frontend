@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     # PR が merged=true の場合のみ実行
     if: github.event.pull_request.merged == true
-
+    env:
+      REACT_APP_API_BASE_URL: https://192.168.11.26
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,7 +31,7 @@ jobs:
         run: npm install
 
       - name: Build React app for production
-        run: npm run build:prod
+        run: npm run build
 
       - name: Archive build output
         run: zip -r build-artifact.zip build/

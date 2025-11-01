@@ -1,82 +1,57 @@
-const CACHE_NAME = 'cellar-app-cache-v2';
+// sw.js (同一オリジン用シンプル版)
 const STATIC_CACHE = 'static-cache-v1';
 const API_CACHE = 'api-cache-v1';
+const STATIC_URLS = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/favicon.ico',
+  '/logo192.png',
+  '/logo512.png',
+  '/static/js/main.js',
+  '/static/css/main.css'
+];
 
-const staticUrlsToCache = ['/', '/index.html', '/manifest.json'];
-
-// APIのベースURLを設定（config.jsonから読み込む予定）
-let API_BASE_URL = '';
-
-// ビルド時に配置されたconfig.jsonを読み込む
-// fetch('/config.json')
-//   .then(response => response.json())
-//   .then(config => {
-//     API_BASE_URL = config.REACT_APP_API_BASE_URL;
-//   })
-//   .catch(error => {
-//     console.error('Failed to load config:', error);
-//     // デフォルトの設定をフォールバックとして使用
-//     API_BASE_URL = 'https://192.168.11.26:8443';
-//   });
-API_BASE_URL = 'https://192.168.11.26:8443';
-
+// --- Install ---
 self.addEventListener('install', event => {
   event.waitUntil(
-    Promise.all([
-      caches.open(STATIC_CACHE).then(cache => cache.addAll(staticUrlsToCache)),
-      caches.open(API_CACHE)
-    ])
+    caches.open(STATIC_CACHE).then(cache => cache.addAll(STATIC_URLS))
   );
-  console.log('Service Worker installed');
+  self.skipWaiting();
 });
 
+// --- Fetch ---
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  
-  // APIリクエストの場合
-  if (API_BASE_URL && url.origin === new URL(API_BASE_URL).origin) {
+
+  // API
+  if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          // Safari対策: opaqueレスポンスやCORS失敗を弾く
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            console.warn('[SW] Skip caching API response:', response);
-            return response;
-          }
-          // レスポンスのクローンを作成してキャッシュに保存
-          const responseToCache = response.clone();
-          caches.open(API_CACHE)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
+          const clone = response.clone();
+          caches.open(API_CACHE).then(cache => cache.put(event.request, clone));
           return response;
         })
-        .catch(() => {
-          // オフライン時はキャッシュから返す
-          return caches.match(event.request);
-        })
+        .catch(() => caches.match(event.request))
     );
-  } else {
-    // 静的アセットの場合
-    event.respondWith(
-      caches.match(event.request)
-        .then(response => response || fetch(event.request))
-    );
+    return;
   }
+
+  // 静的ファイル
+  event.respondWith(
+    caches.match(event.request).then(r => r || fetch(event.request))
+  );
 });
 
+// --- Activate ---
 self.addEventListener('activate', event => {
   event.waitUntil(
-    Promise.all([
-      // 古いキャッシュを削除
-      caches.keys().then(keys => Promise.all(
-        keys.map(key => {
-          if (key !== STATIC_CACHE && key !== API_CACHE) {
-            return caches.delete(key);
-          }
-        })
-      ))
-    ])
+    caches.keys().then(keys =>
+      Promise.all(keys.map(key => {
+        if (![STATIC_CACHE, API_CACHE].includes(key)) return caches.delete(key);
+      }))
+    )
   );
-  console.log('Service Worker activated');
+  self.clients.claim();
 });

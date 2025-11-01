@@ -1,12 +1,17 @@
 import axios from "axios";
-import { loadConfig } from "../config";
 
 let axiosClient = null;
 
 export async function initAxiosClient() {
-  const config = await loadConfig();
+  // 環境変数が未設定または空文字の場合はデフォルト値を使う
+  let envBase = (process.env.REACT_APP_API_BASE_URL || "").trim();
+  envBase = envBase.replace(/\/+$/, "");
+  if (!envBase) {
+    envBase = "https://192.168.11.26:8443";
+  }
+
   axiosClient = axios.create({
-    baseURL: config.REACT_APP_API_BASE_URL,
+    baseURL: `${envBase}/api`,
     headers: {
       "Content-Type": "application/json",
     },
