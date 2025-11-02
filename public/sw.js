@@ -40,25 +40,39 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// --- Fetch ---
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // APIキャッシュ
+  // --- API キャッシュ (オンライン優先 + オフラインフォールバック) ---
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          const clone = response.clone();
-          caches.open(API_CACHE).then(cache => cache.put(event.request, clone));
-          return response;
-        })
-        .catch(() => caches.match(event.request))
+      (async () => {
+        try {
+          // ネットワーク優先で取得
+          const networkResponse = await fetch(event.request);
+          const clone = networkResponse.clone();
+          const cache = await caches.open('api-cache-v1');
+          cache.put(event.request, clone);
+          return networkResponse;
+        } catch (err) {
+          // オフライン時はキャッシュ参照
+          const cached = await caches.match(event.request);
+          if (cached) {
+            console.log('[SW] Offline cache hit for', event.request.url);
+            return cached;
+          }
+          // キャッシュにもない場合のエラー応答
+          return new Response(
+            JSON.stringify({ error: 'Offline and no cache available' }),
+            { status: 503, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+      })()
     );
-    return;
+    return; // ← ここで処理を終了
   }
 
-  // 静的ファイル（オフライン対応）
+  // --- 静的ファイル処理（既存部分） ---
   event.respondWith(
     caches.match(event.request).then(response => {
       if (response) return response;
