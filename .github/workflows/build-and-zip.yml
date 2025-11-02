@@ -14,7 +14,7 @@ jobs:
     # PR が merged=true の場合のみ実行
     if: github.event.pull_request.merged == true
     env:
-      REACT_APP_API_BASE_URL: https://192.168.11.26
+      REACT_APP_API_BASE_URL: https://cellar-app.local
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
