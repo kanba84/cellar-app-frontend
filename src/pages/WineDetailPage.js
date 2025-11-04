@@ -148,7 +148,7 @@ useEffect(() => {
     formData.append("label_image", jpegBlob, "label.jpg");
 
     // --- PATCH送信 ---
-    const response = await fetch(`https://cellar-app.local:8443/wines/${id}`, {
+    const response = await fetch(`https://cellar-app.local/wines/${id}`, {
       method: "PATCH",
       body: formData,
     });
