@@ -148,7 +148,7 @@ useEffect(() => {
     formData.append("label_image", jpegBlob, "label.jpg");
 
     // --- PATCH送信 ---
-    const response = await fetch(`https://192.168.11.26:8443/wines/${id}`, {
+    const response = await fetch(`https://cellar-app.local:8443/wines/${id}`, {
       method: "PATCH",
       body: formData,
     });
@@ -241,7 +241,7 @@ async function convertToJpeg(file, quality = 0.9) {
               {/* ラベル画像 */}
                 <Box
                   component="img"
-                  src={wine.label_image_url || "https://192.168.11.26/labels/sample_thumbnail.png"}
+                  src={wine.label_image_url || "https://cellar-app.local/labels/sample_thumbnail.png"}
                   alt={`${wine.name} label`}
                   sx={{
                     width: 120,
