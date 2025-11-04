@@ -7,7 +7,7 @@ export async function initAxiosClient() {
   let envBase = (process.env.REACT_APP_API_BASE_URL || "").trim();
   envBase = envBase.replace(/\/+$/, "");
   if (!envBase) {
-    envBase = "https://192.168.11.26:8443";
+    envBase = "https://cellar-app.local";
   }
 
   axiosClient = axios.create({

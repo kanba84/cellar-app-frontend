@@ -13,7 +13,7 @@ export async function loadConfig() {
       console.error('Failed to load config:', error);
       // デフォルトの設定をフォールバックとして使用
       config = {
-        REACT_APP_API_BASE_URL: 'https://192.168.11.26:8443'
+        REACT_APP_API_BASE_URL: 'https://cellar-app.local',
       };
     }
   }
