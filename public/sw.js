@@ -1,6 +1,6 @@
 // sw.js (React build版 + Safari対応)
-const STATIC_CACHE = 'static-cache-v3';
-const API_CACHE = 'api-cache-v1';
+const STATIC_CACHE = 'static-cache-v4';
+const API_CACHE = 'api-cache-v4';
 const MANIFEST_URL = '/asset-manifest.json';
 
 // --- Install ---
