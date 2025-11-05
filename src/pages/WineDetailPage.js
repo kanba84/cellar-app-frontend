@@ -135,7 +135,7 @@ useEffect(() => {
     }
   };
 
-  const handleLabelImageChange = async (e) => {
+const handleLabelImageChange = async (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
 
@@ -148,7 +148,7 @@ useEffect(() => {
     formData.append("label_image", jpegBlob, "label.jpg");
 
     // --- PATCH送信 ---
-    const response = await fetch(`https://cellar-app.local/wines/${id}`, {
+    const response = await fetch(`https://cellar-app.local/api/wines/${id}`, {
       method: "PATCH",
       body: formData,
     });
