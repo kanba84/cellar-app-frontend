@@ -191,11 +191,17 @@ async function convertToJpeg(file, quality = 0.9) {
           quality
         );
       };
-      img.onerror = reject;
+      img.onerror = (e) => {
+        console.error("Image load error:", e);
+        reject(e);
+      };
       img.src = event.target.result;
     };
 
-    reader.onerror = reject;
+    reader.onerror = (e) => {
+      console.error("FileReader error:", e);
+      reject(e);
+    };
     reader.readAsDataURL(file);
   });
 }
@@ -270,7 +276,7 @@ async function convertToJpeg(file, quality = 0.9) {
                 {/* 非表示のファイル入力 */}
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png"
                   style={{ display: "none" }}
                   ref={fileInputRef}
                   onChange={handleLabelImageChange}

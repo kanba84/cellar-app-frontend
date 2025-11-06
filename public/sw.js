@@ -51,7 +51,7 @@ self.addEventListener('fetch', event => {
           // ネットワーク優先で取得
           const networkResponse = await fetch(event.request);
           const clone = networkResponse.clone();
-          const cache = await caches.open('api-cache-v1');
+          const cache = await caches.open(API_CACHE);
           cache.put(event.request, clone);
           return networkResponse;
         } catch (err) {
