@@ -1,14 +1,56 @@
-// sw.js (React build版 + Safari対応)
+// sw.js (React build版 + Safari対応 + IndexedDB)
 const STATIC_CACHE = 'static-cache-v4';
 const API_CACHE = 'api-cache-v4';
 const MANIFEST_URL = '/asset-manifest.json';
+const DB_NAME = 'api-response-cache';
+const DB_STORE = 'responses';
+
+// --- IndexedDB ヘルパー ---
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(DB_STORE)) {
+        db.createObjectStore(DB_STORE);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function saveToDB(url, data) {
+  try {
+    const db = await openDB();
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    tx.objectStore(DB_STORE).put(data, url);
+    await tx.done;
+  } catch (e) {
+    console.warn('[SW] IndexedDB save failed:', e);
+  }
+}
+
+async function loadFromDB(url) {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_STORE, 'readonly');
+      const req = tx.objectStore(DB_STORE).get(url);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (e) {
+    console.warn('[SW] IndexedDB load failed:', e);
+    return null;
+  }
+}
 
 // --- Install ---
 self.addEventListener('install', event => {
   event.waitUntil(
     (async () => {
       try {
-        // asset-manifest.json からキャッシュ対象を自動取得
         const res = await fetch(MANIFEST_URL, { cache: 'no-store' });
         const manifest = await res.json();
 
@@ -21,7 +63,7 @@ self.addEventListener('install', event => {
           '/logo512.png',
           manifest.files['main.js'],
           manifest.files['main.css'],
-        ].filter(Boolean); // undefinedを除外
+        ].filter(Boolean);
 
         const cache = await caches.open(STATIC_CACHE);
         for (const url of files) {
@@ -40,39 +82,48 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
+// --- Fetch ---
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // --- API キャッシュ (オンライン優先 + オフラインフォールバック) ---
+  // --- API キャッシュ (オンライン優先 + IndexedDBフォールバック) ---
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       (async () => {
         try {
-          // ネットワーク優先で取得
           const networkResponse = await fetch(event.request);
           const clone = networkResponse.clone();
-          const cache = await caches.open(API_CACHE);
-          cache.put(event.request, clone);
+
+          // JSONレスポンスをIndexedDBに保存
+          const contentType = clone.headers.get('Content-Type') || '';
+          if (contentType.includes('application/json')) {
+            const json = await clone.json();
+            await saveToDB(event.request.url, json);
+          }
+
           return networkResponse;
         } catch (err) {
-          // オフライン時はキャッシュ参照
-          const cached = await caches.match(event.request);
-          if (cached) {
-            console.log('[SW] Offline cache hit for', event.request.url);
-            return cached;
+          console.warn('[SW] Network failed, trying IndexedDB:', err);
+          const cachedJson = await loadFromDB(event.request.url);
+          if (cachedJson) {
+            console.log('[SW] Offline IndexedDB hit for', event.request.url);
+            return new Response(JSON.stringify(cachedJson), {
+              headers: { 'Content-Type': 'application/json' },
+            });
           }
-          // キャッシュにもない場合のエラー応答
+
+          // IndexedDBにもない場合
           return new Response(
-            JSON.stringify({ error: 'Offline and no cache available' }),
+            JSON.stringify({ error: 'Offline and no cached data available' }),
             { status: 503, headers: { 'Content-Type': 'application/json' } }
           );
         }
       })()
     );
-    return; // ← ここで処理を終了
+    return;
   }
 
-  // --- 静的ファイル処理（既存部分） ---
+  // --- 静的ファイル ---
   event.respondWith(
     caches.match(event.request).then(response => {
       if (response) return response;
