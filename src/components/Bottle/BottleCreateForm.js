@@ -54,25 +54,37 @@ function BottleCreateForm({
           </TextField>
         )}
         <TextField
+          select
           label="棚 行"
-          type="number"
           value={form.row_number}
           onChange={(e) => onChange({ ...form, row_number: e.target.value })}
           required
           size="small"
           InputProps={{ sx: { fontSize: inputFontSize } }}
           InputLabelProps={{ sx: { fontSize: inputFontSize } }}
-        />
+        >
+          {[...Array(9)].map((_, i) => (
+            <MenuItem key={i + 1} value={String(i + 1)}>
+              {i + 1}
+            </MenuItem>
+          ))}
+        </TextField>
         <TextField
+          select
           label="棚 列"
-          type="number"
           value={form.column_number}
           onChange={(e) => onChange({ ...form, column_number: e.target.value })}
           required
           size="small"
           InputProps={{ sx: { fontSize: inputFontSize } }}
           InputLabelProps={{ sx: { fontSize: inputFontSize } }}
-        />
+        >
+          {[...Array(7)].map((_, i) => (
+            <MenuItem key={i + 1} value={String(i + 1)}>
+              {i + 1}
+            </MenuItem>
+          ))}
+        </TextField>
         <TextField
           label="メモ"
           value={form.note}
