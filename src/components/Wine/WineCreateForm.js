@@ -52,14 +52,26 @@ function WineCreateForm({
           InputLabelProps={{ sx: { fontSize: inputFontSize } }}
         />
         <TextField
+          select
           label="ヴィンテージ"
-          type="number"
-          value={wineForm.vintage}
+          value={wineForm.vintage || ""}
           size="small"
           onChange={(e) => onChange({ ...wineForm, vintage: e.target.value })}
           InputProps={{ sx: { fontSize: inputFontSize } }}
           InputLabelProps={{ sx: { fontSize: inputFontSize } }}
-        />
+        >
+          <MenuItem value="" sx={{ fontSize: inputFontSize }}>
+            選択してください
+          </MenuItem>
+          {Array.from(
+            { length: new Date().getFullYear() - 1900 + 1 },
+            (_, i) => new Date().getFullYear() - i,
+          ).map((year) => (
+            <MenuItem key={year} value={year} sx={{ fontSize: inputFontSize }}>
+              {year}
+            </MenuItem>
+          ))}
+        </TextField>
         <TextField
           select
           label="タイプ"

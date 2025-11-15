@@ -9,6 +9,7 @@ import Switch from "@mui/material/Switch";
 import wineTypeColor from "../../utils/wineUtils";
 import { useNavigate } from "react-router-dom";
 import "flag-icons/css/flag-icons.min.css";
+import MenuItem from "@mui/material/MenuItem";
 
 function BottleItem({
   bottle,
@@ -95,25 +96,37 @@ function BottleItem({
         {editId === bottle.id ? (
           <Stack direction="row" spacing={1}>
             <TextField
+              select
               label="棚 行"
-              type="number"
               size="small"
               value={editForm.row_number || ""}
               onChange={(e) =>
                 onEditChange({ ...editForm, row_number: e.target.value })
               }
               sx={{ width: 80 }}
-            />
+            >
+              {[...Array(9)].map((_, i) => (
+                <MenuItem key={i + 1} value={String(i + 1)}>
+                  {i + 1}
+                </MenuItem>
+              ))}
+            </TextField>
             <TextField
+              select
               label="棚 列"
-              type="number"
               size="small"
               value={editForm.column_number || ""}
               onChange={(e) =>
                 onEditChange({ ...editForm, column_number: e.target.value })
               }
               sx={{ width: 80 }}
-            />
+            >
+              {[...Array(7)].map((_, i) => (
+                <MenuItem key={i + 1} value={String(i + 1)}>
+                  {i + 1}
+                </MenuItem>
+              ))}
+            </TextField>
           </Stack>
         ) : (
           <Typography variant="body2">
