@@ -1,41 +1,60 @@
-import { useState } from "react";
+import { useReducer, useMemo } from "react";
 
-export function useBottleFilter() {
-  const [filterType, setFilterType] = useState("");
-  const [filterCountry, setFilterCountry] = useState("");
-  const [filterRow, setFilterRow] = useState("");
-  const [filterOpened, setFilterOpened] = useState("");
+const initialFilters = {
+  type: "",
+  country: "",
+  row: "",
+  opened: "",
+};
 
-  const getFilteredBottles = (bottles) => {
+const filterReducer = (state, action) => {
+  switch (action.type) {
+    case "SET_TYPE":
+      return { ...state, type: action.payload };
+    case "SET_COUNTRY":
+      return { ...state, country: action.payload };
+    case "SET_ROW":
+      return { ...state, row: action.payload };
+    case "SET_OPENED":
+      return { ...state, opened: action.payload };
+    case "RESET":
+      return initialFilters;
+    default:
+      return state;
+  }
+};
+
+export function useBottleFilter(bottles = []) {
+  const [filters, dispatch] = useReducer(filterReducer, initialFilters);
+
+  // useMemo を使ってフィルタ結果をメモ化
+  // bottles と filter条件が変わった時だけ再計算する
+  const filteredBottles = useMemo(() => {
     return bottles.filter((bottle) => {
       let ok = true;
-      if (filterType) ok = ok && bottle.wine?.wine_type_name === filterType;
-      if (filterCountry)
-        ok = ok && bottle.wine?.country_name === filterCountry;
-      if (filterRow) ok = ok && String(bottle.row_number) === String(filterRow);
-      if (filterOpened === "opened") ok = ok && bottle.is_opened;
-      if (filterOpened === "unopened") ok = ok && !bottle.is_opened;
+      if (filters.type) ok = ok && bottle.wine?.wine_type_name === filters.type;
+      if (filters.country)
+        ok = ok && bottle.wine?.country_name === filters.country;
+      if (filters.row) ok = ok && String(bottle.row_number) === String(filters.row);
+      if (filters.opened === "opened") ok = ok && bottle.is_opened;
+      if (filters.opened === "unopened") ok = ok && !bottle.is_opened;
       return ok;
     });
-  };
+  }, [bottles, filters]);
 
-  const resetFilters = () => {
-    setFilterType("");
-    setFilterCountry("");
-    setFilterRow("");
-    setFilterOpened("");
-  };
+  const setFilterType = (value) => dispatch({ type: "SET_TYPE", payload: value });
+  const setFilterCountry = (value) => dispatch({ type: "SET_COUNTRY", payload: value });
+  const setFilterRow = (value) => dispatch({ type: "SET_ROW", payload: value });
+  const setFilterOpened = (value) => dispatch({ type: "SET_OPENED", payload: value });
+  const resetFilters = () => dispatch({ type: "RESET" });
 
   return {
-    filterType,
+    filters,
     setFilterType,
-    filterCountry,
     setFilterCountry,
-    filterRow,
     setFilterRow,
-    filterOpened,
     setFilterOpened,
-    getFilteredBottles,
+    filteredBottles,
     resetFilters,
   };
 }

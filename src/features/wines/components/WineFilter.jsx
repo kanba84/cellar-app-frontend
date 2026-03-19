@@ -1,13 +1,12 @@
-import FilterPanel from "../Filter/FilterPanel";
+import FilterPanel from "../../../components/Filter/FilterPanel";
 
-function BottleFilter({
+function WineFilter({
   filters,
   setFilterType,
   setFilterCountry,
-  setFilterRow,
-  setFilterOpened,
+  setFilterRegion,
   resetFilters,
-  bottles = [],
+  wines = [],
   isMobile,
 }) {
   // FilterPanel用の統一的な onChange ハンドラ
@@ -19,11 +18,8 @@ function BottleFilter({
       case "country":
         setFilterCountry(value);
         break;
-      case "row":
-        setFilterRow(value);
-        break;
-      case "opened":
-        setFilterOpened(value);
+      case "region":
+        setFilterRegion(value);
         break;
       default:
         break;
@@ -34,14 +30,12 @@ function BottleFilter({
   const filterFields = [
     {
       name: "type",
-      label: "タイプ",
+      label: "ワインタイプ",
       type: "select",
       options: [
         { label: "すべて", value: "" },
         ...[
-          ...new Set(
-            bottles.map((b) => b.wine?.wine_type_name).filter(Boolean)
-          ),
+          ...new Set(wines.map((w) => w.wine_type_name).filter(Boolean)),
         ].map((type) => ({ label: type, value: type })),
       ],
       sx: { minWidth: 120 },
@@ -53,28 +47,20 @@ function BottleFilter({
       options: [
         { label: "すべて", value: "" },
         ...[
-          ...new Set(
-            bottles.map((b) => b.wine?.country_name).filter(Boolean)
-          ),
+          ...new Set(wines.map((w) => w.country_name).filter(Boolean)),
         ].map((country) => ({ label: country, value: country })),
       ],
       sx: { minWidth: 120 },
     },
     {
-      name: "row",
-      label: "行",
-      type: "number",
-      placeholder: "例: 1",
-      sx: { minWidth: 80 },
-    },
-    {
-      name: "opened",
-      label: "開封状態",
+      name: "region",
+      label: "地域",
       type: "select",
       options: [
         { label: "すべて", value: "" },
-        { label: "未開封", value: "unopened" },
-        { label: "開封済み", value: "opened" },
+        ...[...new Set(wines.map((w) => w.region_name).filter(Boolean))].map(
+          (region) => ({ label: region, value: region })
+        ),
       ],
       sx: { minWidth: 120 },
     },
@@ -91,4 +77,4 @@ function BottleFilter({
   );
 }
 
-export default BottleFilter;
+export default WineFilter;
