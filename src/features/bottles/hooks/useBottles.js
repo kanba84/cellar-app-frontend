@@ -29,7 +29,6 @@ export function useBottles() {
     try {
       await deleteBottle(id);
       setBottles((prev) => prev.filter((b) => b.id !== id));
-      await loadBottles();
     } catch (err) {
       alert("削除に失敗しました");
     }
@@ -39,7 +38,6 @@ export function useBottles() {
     try {
       const newBottle = await createBottle(bottleData);
       setBottles((prev) => [...prev, newBottle]);
-      await loadBottles();
       return newBottle;
     } catch (err) {
       throw new Error("追加に失敗しました");
@@ -52,7 +50,6 @@ export function useBottles() {
       setBottles((prev) =>
         prev.map((b) => (b.id === id ? { ...b, ...updated } : b)),
       );
-      await loadBottles();
       return updated;
     } catch (err) {
       throw new Error("更新に失敗しました");

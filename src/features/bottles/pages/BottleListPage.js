@@ -31,16 +31,14 @@ function BottleListPage() {
   } = useBottles();
 
   const {
-    filterType,
+    filters,
     setFilterType,
-    filterCountry,
     setFilterCountry,
-    filterRow,
     setFilterRow,
-    filterOpened,
     setFilterOpened,
-    getFilteredBottles,
-  } = useBottleFilter();
+    filteredBottles,
+    resetFilters,
+  } = useBottleFilter(bottles);
 
   const { form, setForm, creating, handleCreate: handleCreateBottle } =
     useBottleForm();
@@ -103,8 +101,6 @@ function BottleListPage() {
     }
   };
 
-  const filteredBottles = getFilteredBottles(bottles);
-
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" mt={4}>
@@ -126,16 +122,14 @@ function BottleListPage() {
 
       {/* フィルターUI */}
       <BottleFilter
+        filters={filters}
+        setFilterType={setFilterType}
+        setFilterCountry={setFilterCountry}
+        setFilterRow={setFilterRow}
+        setFilterOpened={setFilterOpened}
+        resetFilters={resetFilters}
         bottles={bottles}
         isMobile={isMobile}
-        filterType={filterType}
-        setFilterType={setFilterType}
-        filterCountry={filterCountry}
-        setFilterCountry={setFilterCountry}
-        filterRow={filterRow}
-        setFilterRow={setFilterRow}
-        filterOpened={filterOpened}
-        setFilterOpened={setFilterOpened}
       />
 
       {/* 追加ボタン */}

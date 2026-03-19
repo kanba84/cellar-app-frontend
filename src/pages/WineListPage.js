@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchWines } from "../api/wineApi";
+import { useWineFilter } from "../features/wines/hooks/useWineFilter";
+import WineFilter from "../features/wines/components/WineFilter";
 import Typography from "@mui/material/Typography";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -9,11 +11,25 @@ import ListItemText from "@mui/material/ListItemText";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
+import { useTheme } from "@mui/material/styles";
+import { useMediaQuery } from "@mui/material";
 
 function WineListPage() {
   const [wines, setWines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const {
+    filters,
+    setFilterType,
+    setFilterCountry,
+    setFilterRegion,
+    filteredWines,
+    resetFilters,
+  } = useWineFilter(wines);
 
   useEffect(() => {
     fetchWines()
@@ -32,15 +48,35 @@ function WineListPage() {
   if (error) return <Alert severity="error">{error}</Alert>;
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
+    <Box px={isMobile ? 0.5 : 2}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        fontSize={isMobile ? 22 : 32}
+      >
         ワイン一覧
       </Typography>
-      {wines.length === 0 ? (
-        <Typography>登録されているワインはありません。</Typography>
+
+      {/* フィルターUI */}
+      <WineFilter
+        filters={filters}
+        setFilterType={setFilterType}
+        setFilterCountry={setFilterCountry}
+        setFilterRegion={setFilterRegion}
+        resetFilters={resetFilters}
+        wines={wines}
+        isMobile={isMobile}
+      />
+
+      {filteredWines.length === 0 ? (
+        <Typography>
+          {wines.length === 0
+            ? "登録されているワインはありません。"
+            : "条件に合うワインはありません。"}
+        </Typography>
       ) : (
         <List>
-          {wines.map((wine) => (
+          {filteredWines.map((wine) => (
             <ListItem key={wine.id} disablePadding>
               <ListItemButton component={Link} to={`/wines/${wine.id}`}>
                 <ListItemText
