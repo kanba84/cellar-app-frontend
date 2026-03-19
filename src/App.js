@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route, Link } from "react-router-dom";
-import BottleListPage from "./pages/BottleListPage";
+import BottleListPage from "./features/bottles/pages/BottleListPage";
 import WineListPage from "./pages/WineListPage";
 import WineDetailPage from "./pages/WineDetailPage";
 import CountryListPage from "./pages/CountryListPage";
