@@ -80,31 +80,31 @@ function WineListPage() {
         <List>
           {filteredWines.map((wine) => {
             const nameColor = wineTypeColor[wine.wine_type_name] || "inherit";
-            const isoCode = wine.country_iso_code?.toLowerCase() || "";
 
             return (
               <ListItem key={wine.id} disablePadding>
                 <ListItemButton component={Link} to={`/wines/${wine.id}`}>
-                  <ListItemText
-                    primary={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        {isoCode && (
-                          <span
-                            className={`fi fi-${isoCode}`}
-                            style={{
-                              display: "inline-block",
-                              fontSize: "1.2em",
-                              flexShrink: 0,
-                            }}
-                          />
-                        )}
-                        <span style={{ color: nameColor }}>
-                          {wine.name}
-                          {wine.vintage && ` (${wine.vintage})`}
-                        </span>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    gap={1}
+                    width="100%"
+                  >
+                    {wine.country_iso_code && (
+                      <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+                        <span
+                          className={`fi fi-${wine.country_iso_code.toLowerCase()}`}
+                          style={{ fontSize: "24px", borderRadius: "4px" }}
+                        />
                       </Box>
-                    }
-                  />
+                    )}
+                    <Typography
+                      sx={{ color: nameColor }}
+                    >
+                      {wine.name}
+                      {wine.vintage && ` (${wine.vintage})`}
+                    </Typography>
+                  </Box>
                 </ListItemButton>
               </ListItem>
             );
