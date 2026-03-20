@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { fetchWines } from "../api/wineApi";
 import { useWineFilter } from "../features/wines/hooks/useWineFilter";
 import WineFilter from "../features/wines/components/WineFilter";
+import wineTypeColor from "../utils/wineUtils";
 import Typography from "@mui/material/Typography";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -13,6 +14,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import { useTheme } from "@mui/material/styles";
 import { useMediaQuery } from "@mui/material";
+import "flag-icons/css/flag-icons.min.css";
 
 function WineListPage() {
   const [wines, setWines] = useState([]);
@@ -76,21 +78,37 @@ function WineListPage() {
         </Typography>
       ) : (
         <List>
-          {filteredWines.map((wine) => (
-            <ListItem key={wine.id} disablePadding>
-              <ListItemButton component={Link} to={`/wines/${wine.id}`}>
-                <ListItemText
-                  primary={
-                    <>
+          {filteredWines.map((wine) => {
+            const nameColor = wineTypeColor[wine.wine_type_name] || "inherit";
+
+            return (
+              <ListItem key={wine.id} disablePadding>
+                <ListItemButton component={Link} to={`/wines/${wine.id}`}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    gap={1}
+                    width="100%"
+                  >
+                    {wine.country_iso_code && (
+                      <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+                        <span
+                          className={`fi fi-${wine.country_iso_code.toLowerCase()}`}
+                          style={{ fontSize: "24px", borderRadius: "4px" }}
+                        />
+                      </Box>
+                    )}
+                    <Typography
+                      sx={{ color: nameColor }}
+                    >
                       {wine.name}
                       {wine.vintage && ` (${wine.vintage})`}
-                      {wine.country_name && ` - ${wine.country_name}`}
-                    </>
-                  }
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
+                    </Typography>
+                  </Box>
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
         </List>
       )}
     </Box>
