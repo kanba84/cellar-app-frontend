@@ -98,15 +98,17 @@ function DesignationTypeList({ designationTypes, onDesignationTypeChanged }) {
         ))}
       </List>
 
-      <DesignationTypeCreateForm
-        form={form}
-        creating={creating}
-        onChange={setForm}
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleCreate(form);
-        }}
-      />
+      {createModalOpen && (
+        <DesignationTypeCreateForm
+          form={form}
+          creating={creating}
+          onChange={setForm}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreate(form);
+          }}
+        />
+      )}
     </Box>
   );
 }
