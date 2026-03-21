@@ -5,6 +5,7 @@ function WineFilter({
   setFilterType,
   setFilterCountry,
   setFilterRegion,
+  setFilterName,
   resetFilters,
   wines = [],
   isMobile,
@@ -20,6 +21,9 @@ function WineFilter({
         break;
       case "region":
         setFilterRegion(value);
+        break;
+      case "name":
+        setFilterName(value);
         break;
       default:
         break;
@@ -61,6 +65,19 @@ function WineFilter({
         ...[...new Set(wines.map((w) => w.region_name).filter(Boolean))].map(
           (region) => ({ label: region, value: region })
         ),
+      ],
+      sx: { minWidth: 120 },
+    },
+    {
+      name: "name",
+      label: "ワイン名",
+      type: "text",
+      options: [
+        { label: "すべて", value: "" },
+        ...[...new Set(wines.map((w) => w.name).filter(Boolean))].map((name) => ({
+          label: name,
+          value: name,
+        })),
       ],
       sx: { minWidth: 120 },
     },
