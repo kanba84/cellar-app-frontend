@@ -8,11 +8,10 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
 const resourceLinks = [
-  { name: "生産国一覧", path: "/config/countries" },
-  { name: "リージョン一覧", path: "/config/regions" },
-  { name: "ワインタイプ一覧", path: "/config/wine-types" },
+  { name: "生産国/地域一覧", path: "/config/countries" },
+  { name: "ワインタイプ一覧", path: "/config/wine_types" },
   { name: "アペラシオン一覧", path: "/config/appellations" },
-  { name: "原産地統制呼称一覧", path: "/config/designation_types" },
+  { name: "原産地統制呼称タイプ一覧", path: "/config/designation_types" },
 ];
 
 const ConfigPage = () => {

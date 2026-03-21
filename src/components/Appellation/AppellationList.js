@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import { createAppellation, deleteAppellation } from "../../api/appellationApi";
 
-import { Box, List, ListItem, ListItemText, Button, CircularProgress } from "@mui/material";
+import {
+  Box,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 
 import AppellationCreateForm from "./AppellationCreateForm";
 
@@ -30,6 +37,11 @@ function AppellationList({ appellations, onAppellationChanged }) {
     setAdding(true);
     try {
       await createAppellation(data);
+      setAppellationForm({
+        name: "",
+        designation_type_id: "",
+        region_id: "",
+      });
       setCreateModalOpen(false);
       if (onAppellationChanged) onAppellationChanged();
     } finally {
@@ -47,6 +59,16 @@ function AppellationList({ appellations, onAppellationChanged }) {
 
   return (
     <Box>
+      <Box mb={2}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setCreateModalOpen(true)}
+        >
+          追加
+        </Button>
+      </Box>
+
       <List>
         {appellations.map((appellation) => (
           <ListItem
@@ -67,14 +89,18 @@ function AppellationList({ appellations, onAppellationChanged }) {
           </ListItem>
         ))}
       </List>
-      <AppellationCreateForm
-        open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        onSubmit={handleCreate}
-        appellationForm={appellationForm}
-        onChange={setAppellationForm}
-        adding={adding}
-      />
+
+      {createModalOpen && (
+        <AppellationCreateForm
+          appellationForm={appellationForm}
+          creatingWine={adding}
+          onChange={setAppellationForm}
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleCreate(appellationForm);
+          }}
+        />
+      )}
     </Box>
   );
 }

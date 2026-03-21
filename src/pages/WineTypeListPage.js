@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { fetchCountries } from "../api/countryApi";
-import CountryList from "../components/Country/CountryList";
+import { fetchWineTypes } from "../api/wineTypeApi";
+import WineTypeList from "../components/WineType/WineTypeList";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 
-function CountryListPage() {
-  const [countries, setCountries] = useState([]);
+function WineTypeListPage() {
+  const [wineTypes, setWineTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     setLoading(true);
-    fetchCountries()
+    fetchWineTypes()
       .then((data) => {
-        console.log("Fetched countries:", data);
-        setCountries(Array.isArray(data) ? data : []);
+        console.log("Fetched wineTypes:", data);
+        setWineTypes(Array.isArray(data) ? data : []);
       })
       .finally(() => setLoading(false));
   }, [reloadKey]);
@@ -36,11 +36,11 @@ function CountryListPage() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        生産国一覧
+        ワインタイプ一覧
       </Typography>
-      <CountryList countries={countries} onCountryChanged={handleReload} />
+      <WineTypeList wineTypes={wineTypes} onWineTypeChanged={handleReload} />
     </Box>
   );
 }
 
-export default CountryListPage;
+export default WineTypeListPage;
