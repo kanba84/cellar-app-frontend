@@ -7,7 +7,6 @@ import CountryListPage from "./pages/CountryListPage";
 import RegionListPage from "./pages/RegionListPage";
 import ConfigPage from "./pages/ConfigPage";
 
-
 // Material UIのインポート
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -17,6 +16,7 @@ import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import AppellationListPage from "./pages/AppellationListPage";
 import DesignationTypeListPage from "./pages/DesignationTypeListPage";
+import WineTypeListPage from "./pages/WineTypeListPage";
 
 function App() {
   return (
@@ -70,6 +70,7 @@ function App() {
             path="/config/designation_types"
             element={<DesignationTypeListPage />}
           />
+          <Route path="/config/wine_types" element={<WineTypeListPage />} />
         </Routes>
       </Container>
     </Box>

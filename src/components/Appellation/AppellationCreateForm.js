@@ -11,7 +11,7 @@ import Stack from "@mui/material/Stack";
 
 function AppellationCreateForm({
   appellationForm,
-  creatingWine,
+  creating,
   onChange,
   onSubmit,
 }) {
@@ -25,7 +25,7 @@ function AppellationCreateForm({
 
   const handleSubmit = (e) => {
     e.preventDefault(); // フォームの標準動作を防止
-    onSubmit(appellationForm); // 正しいデータを親に渡す
+    onSubmit(e); // イベントを親に渡す
   };
 
   return (
@@ -85,9 +85,9 @@ function AppellationCreateForm({
           type="submit"
           variant="contained"
           color="primary"
-          disabled={creatingWine}
+          disabled={creating}
         >
-          {creatingWine ? "追加中..." : "追加"}
+          {creating ? "追加中..." : "追加"}
         </Button>
       </Stack>
     </Box>
