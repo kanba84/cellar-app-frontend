@@ -4,6 +4,7 @@ const initialFilters = {
   type: "",
   country: "",
   region: "",
+  name: "",
 };
 
 const filterReducer = (state, action) => {
@@ -14,6 +15,8 @@ const filterReducer = (state, action) => {
       return { ...state, country: action.payload };
     case "SET_REGION":
       return { ...state, region: action.payload };
+    case "SET_NAME":
+      return { ...state, name: action.payload };
     case "RESET":
       return initialFilters;
     default:
@@ -32,13 +35,21 @@ export function useWineFilter(wines = []) {
       if (filters.type) ok = ok && wine.wine_type_name === filters.type;
       if (filters.country) ok = ok && wine.country_name === filters.country;
       if (filters.region) ok = ok && wine.region_name === filters.region;
+      if (filters.name) {
+        ok = ok && wine.name.toLowerCase().includes(filters.name.toLowerCase());
+      }
       return ok;
     });
   }, [wines, filters]);
 
-  const setFilterType = (value) => dispatch({ type: "SET_TYPE", payload: value });
-  const setFilterCountry = (value) => dispatch({ type: "SET_COUNTRY", payload: value });
-  const setFilterRegion = (value) => dispatch({ type: "SET_REGION", payload: value });
+  const setFilterType = (value) =>
+    dispatch({ type: "SET_TYPE", payload: value });
+  const setFilterCountry = (value) =>
+    dispatch({ type: "SET_COUNTRY", payload: value });
+  const setFilterRegion = (value) =>
+    dispatch({ type: "SET_REGION", payload: value });
+  const setFilterName = (value) =>
+    dispatch({ type: "SET_NAME", payload: value });
   const resetFilters = () => dispatch({ type: "RESET" });
 
   return {
@@ -46,6 +57,7 @@ export function useWineFilter(wines = []) {
     setFilterType,
     setFilterCountry,
     setFilterRegion,
+    setFilterName,
     filteredWines,
     resetFilters,
   };

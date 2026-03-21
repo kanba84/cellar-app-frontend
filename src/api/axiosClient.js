@@ -3,15 +3,8 @@ import axios from "axios";
 let axiosClient = null;
 
 export async function initAxiosClient() {
-  // 環境変数が未設定または空文字の場合はデフォルト値を使う
-  let envBase = (process.env.REACT_APP_API_BASE_URL || "").trim();
-  envBase = envBase.replace(/\/+$/, "");
-  if (!envBase) {
-    envBase = "https://cellar-app.local";
-  }
-
   axiosClient = axios.create({
-    baseURL: `${envBase}/api`,
+    baseURL: "/api",
     headers: {
       "Content-Type": "application/json",
     },
@@ -22,14 +15,15 @@ export async function initAxiosClient() {
 
   // オフライン時のエラーハンドリングを追加
   axiosClient.interceptors.response.use(
-    response => response,
-    error => {
+    (response) => response,
+    (error) => {
       if (!navigator.onLine) {
         // オフライン時のエラーメッセージを設定
-        error.message = "You are currently offline. Please check your internet connection.";
+        error.message =
+          "You are currently offline. Please check your internet connection.";
       }
       return Promise.reject(error);
-    }
+    },
   );
 }
 
