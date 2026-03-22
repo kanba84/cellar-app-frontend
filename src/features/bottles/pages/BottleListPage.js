@@ -1,5 +1,11 @@
 import { useTheme } from "@mui/material/styles";
-import { useMediaQuery, Box, Typography, CircularProgress, Alert } from "@mui/material";
+import {
+  useMediaQuery,
+  Box,
+  Typography,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
 
 import BottleCreateForm from "../../../components/Bottle/BottleCreateForm";
 import WineWithBottleCreateForm from "../../../components/Wine/WineWithBottleCreateForm";
@@ -40,16 +46,14 @@ function BottleListPage() {
     resetFilters,
   } = useBottleFilter(bottles);
 
-  const { form, setForm, creating, handleCreate: handleCreateBottle } =
-    useBottleForm();
-
   const {
-    editId,
-    editForm,
-    setEditForm,
-    handleEditStart,
-    handleEditSave: handleEditSaveHook,
-  } = useBottleEdit();
+    form,
+    setForm,
+    creating,
+    handleCreate: handleCreateBottle,
+  } = useBottleForm();
+
+  const { editId, editForm, setEditForm, handleEditStart } = useBottleEdit();
 
   const {
     wineWithBottleForm,
@@ -85,7 +89,8 @@ function BottleListPage() {
   // ボトル編集保存の完全な処理
   const handleEditSave = async (id, override) => {
     try {
-      await handleEditSaveHook(apiUpdateBottle, id, override);
+      await apiUpdateBottle(id, override);
+      handleEditStart(null);
     } catch (err) {
       alert(err.message);
     }

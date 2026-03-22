@@ -76,7 +76,9 @@ function BottleItem({
           <Typography variant="body2" color="text.secondary">
             タイプ: {bottle.wine?.wine_type_name || "-"} / 生産国:{" "}
             {bottle.wine?.country_name || "-"}
-            {bottle.wine?.region_name && <> / 地域: {bottle.wine.region_name}</>}
+            {bottle.wine?.region_name && (
+              <> / 地域: {bottle.wine.region_name}</>
+            )}
             <br />
             生産者: {bottle.wine?.producer || "-"}
           </Typography>
@@ -137,7 +139,9 @@ function BottleItem({
         {/* 開封状態 + トグル */}
         <Stack direction="row" spacing={1} alignItems="center">
           <Switch
-            checked={editId === bottle.id ? editForm.is_opened : bottle.is_opened}
+            checked={
+              editId === bottle.id ? editForm.is_opened : bottle.is_opened
+            }
             onChange={handleOpenedToggle}
             color="primary"
           />
@@ -179,7 +183,7 @@ function BottleItem({
                 size="small"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onEditSave(bottle.id);
+                  onEditSave(bottle.id, editForm);
                 }}
               >
                 保存
