@@ -10,6 +10,10 @@ export function useBottleEdit() {
   });
 
   const handleEditStart = (bottle) => {
+    if (!bottle) {
+      setEditId(null);
+      return;
+    }
     setEditId(bottle.id);
     setEditForm({
       row_number: bottle.row_number,

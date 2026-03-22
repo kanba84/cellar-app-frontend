@@ -46,11 +46,11 @@ export function useBottles() {
 
   const handleUpdate = async (id, updateData) => {
     try {
-      const updated = await patchBottle(id, updateData);
+      await patchBottle(id, updateData);
+
       setBottles((prev) =>
-        prev.map((b) => (b.id === id ? { ...b, ...updated } : b)),
+        prev.map((b) => (b.id === id ? { ...b, ...updateData } : b)),
       );
-      return updated;
     } catch (err) {
       throw new Error("更新に失敗しました");
     }
