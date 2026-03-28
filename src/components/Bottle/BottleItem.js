@@ -20,6 +20,7 @@ function BottleItem({
   onEditSave,
   onEditCancel,
   onDelete,
+  onBottleDetail,
 }) {
   const nameColor = wineTypeColor[bottle.wine?.wine_type_name] || "inherit";
   const itemBgColor = bottle.is_opened ? "#e0e0e0" : "#fafafa";
@@ -52,12 +53,19 @@ function BottleItem({
           component="img"
           src={bottle.wine?.label_image_url || "/labels/sample_thumbnail.png"}
           alt={`${bottle.wine?.name} ラベル`}
+          onClick={(e) => {
+            if (onBottleDetail) {
+              e.stopPropagation();
+              onBottleDetail(bottle);
+            }
+          }}
           sx={{
             width: 100,
             height: "auto",
             borderRadius: 2,
             boxShadow: 1,
             flexShrink: 0,
+            cursor: onBottleDetail ? "pointer" : "default",
           }}
         />
 

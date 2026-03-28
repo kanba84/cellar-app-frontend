@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import BottleItem from "./BottleItem";
 import { ExpandMore, ExpandLess } from "@mui/icons-material";
 
-function BottleList({ bottles, isMobile, ...editHandlers }) {
+function BottleList({ bottles, isMobile, onBottleDetail, ...editHandlers }) {
   // 行ごとにボトルをグループ化
   const rowGroups = bottles.reduce((acc, bottle) => {
     const row = bottle.row_number;
@@ -93,7 +93,11 @@ function BottleList({ bottles, isMobile, ...editHandlers }) {
                       },
                     }}
                   >
-                    <BottleItem bottle={bottle} {...editHandlers} />
+                    <BottleItem
+                      bottle={bottle}
+                      onBottleDetail={onBottleDetail}
+                      {...editHandlers}
+                    />
                   </Box>
                 ))}
             </Collapse>
