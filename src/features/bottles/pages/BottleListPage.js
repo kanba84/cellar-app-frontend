@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import {
   useMediaQuery,
@@ -5,7 +6,11 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
+import ViewListIcon from "@mui/icons-material/ViewList";
+import ViewModuleIcon from "@mui/icons-material/ViewModule";
 
 import BottleCreateForm from "../../../components/Bottle/BottleCreateForm";
 import WineWithBottleCreateForm from "../../../components/Wine/WineWithBottleCreateForm";
@@ -13,6 +18,8 @@ import BottleStats from "../../../components/Bottle/BottleStats";
 import BottleFilter from "../../../components/Bottle/BottleFilter";
 import BottleAddButtons from "../../../components/Bottle/BottleAddButtons";
 import BottleList from "../../../components/Bottle/BottleList";
+import CellarVisualizer from "../../../components/Bottle/CellarVisualizer";
+import BottleDetailModal from "../../../components/Bottle/BottleDetailModal";
 
 import { Modal } from "../components/Modal";
 import {
@@ -76,6 +83,13 @@ function BottleListPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const [viewMode, setViewMode] = useState("list");
+  const [detailBottle, setDetailBottle] = useState(null);
+
+  const handleViewModeChange = (_event, next) => {
+    if (next !== null) setViewMode(next);
+  };
+
   // ボトル追加の完全な処理
   const handleCreateBottleSubmit = async (e) => {
     try {
@@ -137,6 +151,36 @@ function BottleListPage() {
         isMobile={isMobile}
       />
 
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 1.5,
+          my: 1.5,
+        }}
+      >
+        <Typography variant="body2" color="text.secondary" component="span">
+          表示
+        </Typography>
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={handleViewModeChange}
+          aria-label="ボトル一覧の表示モード"
+          size={isMobile ? "small" : "medium"}
+        >
+          <ToggleButton value="list" aria-label="リスト表示">
+            <ViewListIcon sx={{ mr: 0.5, fontSize: 20 }} />
+            リスト
+          </ToggleButton>
+          <ToggleButton value="visual" aria-label="セラー外観">
+            <ViewModuleIcon sx={{ mr: 0.5, fontSize: 20 }} />
+            セラー
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+
       {/* 追加ボタン */}
       <BottleAddButtons
         isMobile={isMobile}
@@ -165,18 +209,32 @@ function BottleListPage() {
         />
       </Modal>
 
-      {/* ボトル一覧 */}
-      <BottleList
-        bottles={filteredBottles}
-        isMobile={isMobile}
-        editId={editId}
-        editForm={editForm}
-        onEditStart={handleEditStart}
-        onEditChange={setEditForm}
-        onEditSave={handleEditSave}
-        onEditCancel={() => handleEditStart(null)}
-        onDelete={handleDelete}
+      <BottleDetailModal
+        open={!!detailBottle}
+        bottle={detailBottle}
+        onClose={() => setDetailBottle(null)}
       />
+
+      {/* ボトル一覧 / セラー外観 */}
+      {viewMode === "list" ? (
+        <BottleList
+          bottles={filteredBottles}
+          isMobile={isMobile}
+          onBottleDetail={(b) => setDetailBottle(b)}
+          editId={editId}
+          editForm={editForm}
+          onEditStart={handleEditStart}
+          onEditChange={setEditForm}
+          onEditSave={handleEditSave}
+          onEditCancel={() => handleEditStart(null)}
+          onDelete={handleDelete}
+        />
+      ) : (
+        <CellarVisualizer
+          bottles={filteredBottles}
+          onBottleSelect={(b) => setDetailBottle(b)}
+        />
+      )}
     </Box>
   );
 }
