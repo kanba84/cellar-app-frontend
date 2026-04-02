@@ -26,12 +26,12 @@ function BottleItem({
   const itemBgColor = bottle.is_opened ? "#e0e0e0" : "#fafafa";
   const navigate = useNavigate();
 
-  const handleOpenedToggle = (e) => {
+  const handleOpenedToggle = async (e) => {
     e.stopPropagation();
     if (editId === bottle.id) {
       onEditChange({ ...editForm, is_opened: e.target.checked });
     } else {
-      onEditSave(bottle.id, { is_opened: e.target.checked });
+      await onEditSave(bottle.id, { is_opened: e.target.checked });
     }
   };
 
@@ -189,9 +189,9 @@ function BottleItem({
                 variant="contained"
                 color="primary"
                 size="small"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
-                  onEditSave(bottle.id, editForm);
+                  await onEditSave(bottle.id, editForm);
                 }}
               >
                 保存

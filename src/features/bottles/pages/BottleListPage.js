@@ -40,7 +40,7 @@ function BottleListPage() {
     error,
     handleDelete,
     handleCreate: apiCreateBottle,
-    handleUpdate: apiUpdateBottle,
+    handleUpdate: handleUpdateBottle,
   } = useBottles();
 
   const {
@@ -60,7 +60,13 @@ function BottleListPage() {
     handleCreate: handleCreateBottle,
   } = useBottleForm();
 
-  const { editId, editForm, setEditForm, handleEditStart } = useBottleEdit();
+  const {
+    editId,
+    editForm,
+    setEditForm,
+    handleEditStart,
+    handleEditSave: hookHandleEditSave,
+  } = useBottleEdit();
 
   const {
     wineWithBottleForm,
@@ -92,6 +98,7 @@ function BottleListPage() {
 
   // ボトル追加の完全な処理
   const handleCreateBottleSubmit = async (e) => {
+    e.preventDefault();
     try {
       await handleCreateBottle(apiCreateBottle);
       closeCreateBottleModal();
@@ -103,8 +110,7 @@ function BottleListPage() {
   // ボトル編集保存の完全な処理
   const handleEditSave = async (id, override) => {
     try {
-      await apiUpdateBottle(id, override);
-      handleEditStart(null);
+      await hookHandleEditSave(handleUpdateBottle, id, override);
     } catch (err) {
       alert(err.message);
     }
