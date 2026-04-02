@@ -40,7 +40,8 @@ export function useBottles() {
       setBottles((prev) => [...prev, newBottle]);
       return newBottle;
     } catch (err) {
-      throw new Error("追加に失敗しました");
+      // エラーレスポンス情報を保持したまま throw
+      throw err;
     }
   };
 
@@ -52,7 +53,8 @@ export function useBottles() {
         prev.map((b) => (b.id === id ? { ...b, ...updateData } : b)),
       );
     } catch (err) {
-      throw new Error("更新に失敗しました");
+      // axios エラーオブジェクトをそのまま throw（レスポンス情報を保持）
+      throw err;
     }
   };
 
