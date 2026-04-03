@@ -4,7 +4,7 @@ import {
   deleteBottle,
   createBottle,
   patchBottle,
-} from "../../../api/bottleApi";
+} from "../api/bottleApi";
 
 export function useBottles() {
   const [bottles, setBottles] = useState([]);

@@ -6,7 +6,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Switch from "@mui/material/Switch";
-import wineTypeColor from "../../utils/wineUtils";
+import wineTypeColor from "../../../utils/wineUtils";
 import { useNavigate } from "react-router-dom";
 import "flag-icons/css/flag-icons.min.css";
 import MenuItem from "@mui/material/MenuItem";

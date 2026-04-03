@@ -67,14 +67,7 @@ export function useWineWithBottleForm() {
       resetForm();
       return true;
     } catch (err) {
-      // 409エラー（棚位置重複）を特別処理
-      if (
-        err.response?.status === 409 &&
-        err.response?.data?.error === "POSITION_OCCUPIED"
-      ) {
-        throw new Error("その棚位置はすでに使用されています");
-      }
-      throw new Error("ワインとボトルの追加に失敗しました");
+      throw err;
     } finally {
       setCreatingWineWithBottle(false);
     }

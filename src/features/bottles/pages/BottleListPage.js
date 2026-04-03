@@ -12,16 +12,17 @@ import {
 import ViewListIcon from "@mui/icons-material/ViewList";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 
-import BottleCreateForm from "../../../components/Bottle/BottleCreateForm";
+import BottleCreateForm from "../components/BottleCreateForm";
 import WineWithBottleCreateForm from "../../../components/Wine/WineWithBottleCreateForm";
-import BottleStats from "../../../components/Bottle/BottleStats";
-import BottleFilter from "../../../components/Bottle/BottleFilter";
-import BottleAddButtons from "../../../components/Bottle/BottleAddButtons";
-import BottleList from "../../../components/Bottle/BottleList";
-import CellarVisualizer from "../../../components/Bottle/CellarVisualizer";
-import BottleDetailModal from "../../../components/Bottle/BottleDetailModal";
+import BottleStats from "../components/BottleStats";
+import BottleFilter from "../components/BottleFilter";
+import BottleAddButtons from "../components/BottleAddButtons";
+import BottleList from "../components/BottleList";
+import CellarVisualizer from "../components/CellarVisualizer";
+import BottleDetailModal from "../components/BottleDetailModal";
 
 import { Modal } from "../components/Modal";
+import { isPositionOccupiedError } from "../utils/apiError";
 import {
   useBottles,
   useBottleFilter,
@@ -103,7 +104,11 @@ function BottleListPage() {
       await handleCreateBottle(apiCreateBottle);
       closeCreateBottleModal();
     } catch (err) {
-      alert(err.message);
+      if (isPositionOccupiedError(err)) {
+        alert("その棚位置はすでに使用されています");
+        return;
+      }
+      alert("更新に失敗しました");
     }
   };
 
@@ -112,7 +117,11 @@ function BottleListPage() {
     try {
       await hookHandleEditSave(handleUpdateBottle, id, override);
     } catch (err) {
-      alert(err.message);
+      if (isPositionOccupiedError(err)) {
+        alert("その棚位置はすでに使用されています");
+        return;
+      }
+      alert("更新に失敗しました");
     }
   };
 
@@ -122,7 +131,11 @@ function BottleListPage() {
       await handleCreateWineWithBottle(e);
       closeCreateWineModal();
     } catch (err) {
-      alert(err.message);
+      if (isPositionOccupiedError(err)) {
+        alert("その棚位置はすでに使用されています");
+        return;
+      }
+      alert("更新に失敗しました");
     }
   };
 

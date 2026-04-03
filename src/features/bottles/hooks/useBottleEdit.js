@@ -30,13 +30,7 @@ export function useBottleEdit() {
       setEditId(null);
       return true;
     } catch (err) {
-      if (
-        err.response?.status === 409 &&
-        err.response?.data?.error === "POSITION_OCCUPIED"
-      ) {
-        throw new Error("その棚位置はすでに使用されています");
-      }
-      throw new Error("更新に失敗しました");
+      throw err;
     }
   };
 
