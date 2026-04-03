@@ -1,6 +1,6 @@
 import React from "react";
 import WineCreateForm from "./WineCreateForm";
-import BottleCreateForm from "../Bottle/BottleCreateForm";
+import BottleCreateForm from "../../features/bottles/components/BottleCreateForm";
 import { Box, Button, Stack } from "@mui/material";
 
 function WineWithBottleCreateForm({ form, creating, onChange, onSubmit }) {

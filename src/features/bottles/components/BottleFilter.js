@@ -1,4 +1,4 @@
-import FilterPanel from "../Filter/FilterPanel";
+import FilterPanel from "../../../components/Filter/FilterPanel";
 
 function BottleFilter({
   filters,
@@ -40,7 +40,7 @@ function BottleFilter({
         { label: "すべて", value: "" },
         ...[
           ...new Set(
-            bottles.map((b) => b.wine?.wine_type_name).filter(Boolean)
+            bottles.map((b) => b.wine?.wine_type_name).filter(Boolean),
           ),
         ].map((type) => ({ label: type, value: type })),
       ],
@@ -53,9 +53,7 @@ function BottleFilter({
       options: [
         { label: "すべて", value: "" },
         ...[
-          ...new Set(
-            bottles.map((b) => b.wine?.country_name).filter(Boolean)
-          ),
+          ...new Set(bottles.map((b) => b.wine?.country_name).filter(Boolean)),
         ].map((country) => ({ label: country, value: country })),
       ],
       sx: { minWidth: 120 },
