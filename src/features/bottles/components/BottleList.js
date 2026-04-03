@@ -1,45 +1,20 @@
-import { Box, List, Typography, Divider, Collapse, IconButton } from "@mui/material";
-import React, { useState } from "react";
+import {
+  Box,
+  List,
+  Typography,
+  Divider,
+  Collapse,
+  IconButton,
+} from "@mui/material";
+import React from "react";
 import BottleItem from "./BottleItem";
+import { useBottleListViewModel } from "../hooks/useBottleListViewModel";
 import { ExpandMore, ExpandLess } from "@mui/icons-material";
 
 function BottleList({ bottles, isMobile, onBottleDetail, ...editHandlers }) {
-  // 行ごとにボトルをグループ化
-  const rowGroups = bottles.reduce((acc, bottle) => {
-    const row = bottle.row_number;
-    if (!acc[row]) acc[row] = [];
-    acc[row].push(bottle);
-    return acc;
-  }, {});
+  const { rowGroups, sortedRows, openRows, toggleRow } =
+    useBottleListViewModel(bottles);
 
-  const sortedRows = Object.keys(rowGroups).sort((a, b) => Number(a) - Number(b));
-
-
-  // 折りたたみ状態
-  const [openRows, setOpenRows] = useState(() =>
-    Object.fromEntries(sortedRows.map((row) => [row, true])) // 全て開いた状態で初期化
-  );
-
-  React.useEffect(() => {
-    const savedState = sessionStorage.getItem('bottleListOpenRows');
-    if (savedState) {
-      const parsed = JSON.parse(savedState);
-      const normalized = Object.fromEntries(
-        Object.entries(parsed).map(([row, val]) => [row, Boolean(val)])
-      );
-      setOpenRows(normalized);
-    }
-  }, []); // 空配列でマウント時のみ実行
-
-
-  const toggleRow = (row) => {
-    setOpenRows((prev) => {
-      const newState = { ...prev, [row]: !prev[row] };
-      // 状態をsessionStorageに保存
-      sessionStorage.setItem('bottleListOpenRows', JSON.stringify(newState));
-      return newState;
-    });
-  };
   if (bottles.length === 0) {
     return <Typography>登録されているボトルはありません。</Typography>;
   }
@@ -66,7 +41,9 @@ function BottleList({ bottles, isMobile, onBottleDetail, ...editHandlers }) {
               }}
               onClick={() => toggleRow(row)}
             >
-              <Typography variant="subtitle1">{row}段目 ({bottlesInRow.length}本）</Typography>
+              <Typography variant="subtitle1">
+                {row}段目 ({bottlesInRow.length}本）
+              </Typography>
               <IconButton size="small">
                 {openRows[row] ? <ExpandLess /> : <ExpandMore />}
               </IconButton>
@@ -75,7 +52,9 @@ function BottleList({ bottles, isMobile, onBottleDetail, ...editHandlers }) {
             {/* 折りたたみ本体 */}
             <Collapse in={openRows[row]} timeout="auto" unmountOnExit>
               {rowGroups[row]
-                .sort((a, b) => Number(a.column_number) - Number(b.column_number))
+                .sort(
+                  (a, b) => Number(a.column_number) - Number(b.column_number),
+                )
                 .map((bottle) => (
                   <Box
                     key={bottle.id}

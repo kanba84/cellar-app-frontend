@@ -1,27 +1,7 @@
 import { useState } from "react";
 import { useTheme } from "@mui/material/styles";
-import {
-  useMediaQuery,
-  Box,
-  Typography,
-  CircularProgress,
-  Alert,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "@mui/material";
-import ViewListIcon from "@mui/icons-material/ViewList";
-import ViewModuleIcon from "@mui/icons-material/ViewModule";
+import { useMediaQuery, Box, CircularProgress, Alert } from "@mui/material";
 
-import BottleCreateForm from "../components/BottleCreateForm";
-import WineWithBottleCreateForm from "../../../components/Wine/WineWithBottleCreateForm";
-import BottleStats from "../components/BottleStats";
-import BottleFilter from "../components/BottleFilter";
-import BottleAddButtons from "../components/BottleAddButtons";
-import BottleList from "../components/BottleList";
-import CellarVisualizer from "../components/CellarVisualizer";
-import BottleDetailModal from "../components/BottleDetailModal";
-
-import { Modal } from "../components/Modal";
 import { isPositionOccupiedError } from "../utils/apiError";
 import {
   useBottles,
@@ -32,6 +12,7 @@ import {
   useModal,
   useWines,
 } from "../hooks";
+import BottleListView from "../components/BottleListView";
 
 function BottleListPage() {
   // カスタムフックの使用
@@ -93,6 +74,15 @@ function BottleListPage() {
   const [viewMode, setViewMode] = useState("list");
   const [detailBottle, setDetailBottle] = useState(null);
 
+  const handleApiError = (err) => {
+    if (isPositionOccupiedError(err)) {
+      alert("その棚位置はすでに使用されています");
+      return true;
+    }
+    alert("更新に失敗しました");
+    return false;
+  };
+
   const handleViewModeChange = (_event, next) => {
     if (next !== null) setViewMode(next);
   };
@@ -104,11 +94,7 @@ function BottleListPage() {
       await handleCreateBottle(apiCreateBottle);
       closeCreateBottleModal();
     } catch (err) {
-      if (isPositionOccupiedError(err)) {
-        alert("その棚位置はすでに使用されています");
-        return;
-      }
-      alert("更新に失敗しました");
+      if (handleApiError(err)) return;
     }
   };
 
@@ -117,11 +103,7 @@ function BottleListPage() {
     try {
       await hookHandleEditSave(handleUpdateBottle, id, override);
     } catch (err) {
-      if (isPositionOccupiedError(err)) {
-        alert("その棚位置はすでに使用されています");
-        return;
-      }
-      alert("更新に失敗しました");
+      if (handleApiError(err)) return;
     }
   };
 
@@ -131,11 +113,7 @@ function BottleListPage() {
       await handleCreateWineWithBottle(e);
       closeCreateWineModal();
     } catch (err) {
-      if (isPositionOccupiedError(err)) {
-        alert("その棚位置はすでに使用されています");
-        return;
-      }
-      alert("更新に失敗しました");
+      if (handleApiError(err)) return;
     }
   };
 
@@ -150,111 +128,43 @@ function BottleListPage() {
   if (error) return <Alert severity="error">{error}</Alert>;
 
   return (
-    <Box px={isMobile ? 0.5 : 2}>
-      <Typography variant="h4" gutterBottom fontSize={isMobile ? 22 : 32}>
-        ボトル一覧
-      </Typography>
-
-      {/* ボトル総数・タイプごとの本数表示 */}
-      <BottleStats bottles={bottles} />
-
-      {/* フィルターUI */}
-      <BottleFilter
-        filters={filters}
-        setFilterType={setFilterType}
-        setFilterCountry={setFilterCountry}
-        setFilterRow={setFilterRow}
-        setFilterOpened={setFilterOpened}
-        resetFilters={resetFilters}
-        bottles={bottles}
-        isMobile={isMobile}
-      />
-
-      <Box
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 1.5,
-          my: 1.5,
-        }}
-      >
-        <Typography variant="body2" color="text.secondary" component="span">
-          表示
-        </Typography>
-        <ToggleButtonGroup
-          value={viewMode}
-          exclusive
-          onChange={handleViewModeChange}
-          aria-label="ボトル一覧の表示モード"
-          size={isMobile ? "small" : "medium"}
-        >
-          <ToggleButton value="list" aria-label="リスト表示">
-            <ViewListIcon sx={{ mr: 0.5, fontSize: 20 }} />
-            リスト
-          </ToggleButton>
-          <ToggleButton value="visual" aria-label="セラー外観">
-            <ViewModuleIcon sx={{ mr: 0.5, fontSize: 20 }} />
-            セラー
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
-
-      {/* 追加ボタン */}
-      <BottleAddButtons
-        isMobile={isMobile}
-        onAddBottle={openCreateBottleModal}
-        onAddWine={openCreateWineModal}
-      />
-
-      {/* ワイン追加モーダル */}
-      <Modal open={showCreateWineModal} onClose={closeCreateWineModal}>
-        <WineWithBottleCreateForm
-          form={wineWithBottleForm}
-          creating={creatingWineWithBottle}
-          onChange={setWineWithBottleForm}
-          onSubmit={handleCreateWineWithBottleSubmit}
-        />
-      </Modal>
-
-      {/* ボトル追加モーダル */}
-      <Modal open={showCreateBottleModal} onClose={closeCreateBottleModal}>
-        <BottleCreateForm
-          form={form}
-          wines={wines}
-          creating={creating}
-          onChange={setForm}
-          onSubmit={handleCreateBottleSubmit}
-        />
-      </Modal>
-
-      <BottleDetailModal
-        open={!!detailBottle}
-        bottle={detailBottle}
-        onClose={() => setDetailBottle(null)}
-      />
-
-      {/* ボトル一覧 / セラー外観 */}
-      {viewMode === "list" ? (
-        <BottleList
-          bottles={filteredBottles}
-          isMobile={isMobile}
-          onBottleDetail={(b) => setDetailBottle(b)}
-          editId={editId}
-          editForm={editForm}
-          onEditStart={handleEditStart}
-          onEditChange={setEditForm}
-          onEditSave={handleEditSave}
-          onEditCancel={() => handleEditStart(null)}
-          onDelete={handleDelete}
-        />
-      ) : (
-        <CellarVisualizer
-          bottles={filteredBottles}
-          onBottleSelect={(b) => setDetailBottle(b)}
-        />
-      )}
-    </Box>
+    <BottleListView
+      isMobile={isMobile}
+      bottles={bottles}
+      filteredBottles={filteredBottles}
+      filters={filters}
+      setFilterType={setFilterType}
+      setFilterCountry={setFilterCountry}
+      setFilterRow={setFilterRow}
+      setFilterOpened={setFilterOpened}
+      resetFilters={resetFilters}
+      viewMode={viewMode}
+      onViewModeChange={handleViewModeChange}
+      onAddBottle={openCreateBottleModal}
+      onAddWine={openCreateWineModal}
+      showCreateBottleModal={showCreateBottleModal}
+      closeCreateBottleModal={closeCreateBottleModal}
+      showCreateWineModal={showCreateWineModal}
+      closeCreateWineModal={closeCreateWineModal}
+      form={form}
+      setForm={setForm}
+      creating={creating}
+      wines={wines}
+      onCreateBottleSubmit={handleCreateBottleSubmit}
+      wineWithBottleForm={wineWithBottleForm}
+      setWineWithBottleForm={setWineWithBottleForm}
+      creatingWineWithBottle={creatingWineWithBottle}
+      onCreateWineSubmit={handleCreateWineWithBottleSubmit}
+      detailBottle={detailBottle}
+      setDetailBottle={setDetailBottle}
+      editId={editId}
+      editForm={editForm}
+      onEditStart={handleEditStart}
+      onEditChange={setEditForm}
+      onEditSave={handleEditSave}
+      onEditCancel={() => handleEditStart(null)}
+      onDelete={handleDelete}
+    />
   );
 }
 
