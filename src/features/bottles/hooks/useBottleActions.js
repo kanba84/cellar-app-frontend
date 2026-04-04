@@ -10,42 +10,51 @@ export function useBottleActions({
   submitCreateWineWithBottle,
   closeCreateBottleModal,
   closeCreateWineModal,
+  showNotification,
 }) {
-  /**
-   * 共通エラーハンドリング付き実行関数
-   */
-  const executeWithErrorHandling = async (fn, onSuccess) => {
-    try {
-      const result = await fn();
-      if (onSuccess) onSuccess();
-      return result;
-    } catch (err) {
-      handleApiError(err);
-      throw err; // 呼び出し元でもエラーをキャッチできるように再スロー
-    }
-  };
-
   /**
    * APIエラー処理
    */
   const handleApiError = (err) => {
+    console.error("Caught API Error:", err);
     if (isPositionOccupiedError(err)) {
-      alert("その棚位置はすでに使用されています");
-      return true;
+      showNotification("その棚位置はすでに使用されています", "error");
+    } else {
+      showNotification(
+        "処理に失敗しました。通信状況を確認してください",
+        "error",
+      );
     }
-    alert("更新に失敗しました");
-    return false;
+  };
+
+  /**
+   * 共通エラーハンドリング付き実行関数
+   */
+  const executeWithErrorHandling = async (fn, onSuccess, successMessage) => {
+    try {
+      const result = await fn();
+      if (successMessage) showNotification(successMessage, "success");
+      if (onSuccess) onSuccess();
+      return result || true;
+    } catch (err) {
+      handleApiError(err);
+      return null;
+    }
   };
 
   /**
    * ボトル作成（submit）
    */
   const handleCreateBottleSubmit = async (e) => {
-    e.preventDefault();
+    // フォームイベントをここで止める
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
+    }
 
-    executeWithErrorHandling(
+    return await executeWithErrorHandling(
       () => submitCreateBottle(createBottleApi),
       closeCreateBottleModal,
+      "ボトルを登録しました",
     );
   };
 
@@ -53,16 +62,30 @@ export function useBottleActions({
    * ボトル編集保存
    */
   const handleEditSave = async (id, override) => {
-    return await executeWithErrorHandling(() => updateBottleApi(id, override));
+    return await executeWithErrorHandling(
+      () => updateBottleApi(id, override),
+      null,
+      "ボトル情報を更新しました",
+    );
   };
 
   /**
    * ワイン＋ボトル同時作成
    */
   const handleCreateWineWithBottleSubmit = async (e) => {
-    executeWithErrorHandling(
-      () => submitCreateWineWithBottle(e),
+    // 1. まずここでイベントを確実に止める
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
+    }
+
+    // 2. submitCreateWineWithBottle は内部で handleCreate を呼ぶ際、
+    // 期待する引数の形式（API関数, イベント）に合わせて呼び出す必要がある。
+    // ここでは、フォーム側の handleCreate に e が渡って壊れるのを防ぐため、
+    // 関数のみを確実に渡すようにラップします。
+    return await executeWithErrorHandling(
+      () => submitCreateWineWithBottle(createBottleApi),
       closeCreateWineModal,
+      "ワインとボトルを登録しました",
     );
   };
 

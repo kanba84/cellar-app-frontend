@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Alert } from "@mui/material";
+import { Box, CircularProgress, Alert, Snackbar } from "@mui/material";
 
 import {
   useBottles,
@@ -8,6 +8,7 @@ import {
   useBottleActions,
   useBottleUI,
   useWineWithBottleForm,
+  useNotification,
   useModal,
   useWines,
 } from "../hooks";
@@ -22,6 +23,7 @@ function BottleListPage() {
     handleDelete,
     handleCreate: apiCreateBottle,
     handleUpdate: handleUpdateBottle,
+    refresh,
   } = useBottles();
 
   const {
@@ -75,23 +77,48 @@ function BottleListPage() {
     handleViewModeChange,
   } = useBottleUI();
 
+  const { notification, showNotification, closeNotification } =
+    useNotification();
+
   const {
     handleCreateBottleSubmit,
     handleEditSave: apiEditSave,
     handleCreateWineWithBottleSubmit,
   } = useBottleActions({
-    createBottleApi: apiCreateBottle,
-    updateBottleApi: handleUpdateBottle,
+    // 単体作成: 保存後に refresh を呼ぶ
+    createBottleApi: async (data) => {
+      const res = await apiCreateBottle(data);
+      await refresh();
+      return res;
+    },
+    // 更新: 保存後に refresh を呼ぶ
+    updateBottleApi: async (id, data) => {
+      const res = await handleUpdateBottle(id, data);
+      await refresh();
+      return res;
+    },
     submitCreateBottle: handleCreateBottle,
-    submitCreateWineWithBottle: handleCreateWineWithBottle,
+    // ワイン＋ボトル同時作成: 成功後に refresh を呼ぶ
+    submitCreateWineWithBottle: async (api) => {
+      // api は handleCreateWineWithBottle に渡される関数
+      const res = await handleCreateWineWithBottle(api);
+      if (res) await refresh();
+      return res;
+    },
     closeCreateBottleModal,
     closeCreateWineModal,
+    showNotification,
   });
 
-  // 保存処理のラッパー：API実行後に編集モードを終了させる
-  const onEditSave = async (id, form) => {
-    await apiEditSave(id, form);
-    handleEditStart(null); // ここで editId を null にして元の表示に戻す
+  // 保存処理の完了後に編集モードを閉じるための調整
+  const onEditSave = async (id, data) => {
+    // 修正後の handleEditSave は成功時に値、失敗時に null を返します
+    const result = await apiEditSave(id, data);
+
+    // 成功した場合のみ編集モードを終了（editId を null に）する
+    if (result !== null) {
+      handleEditStart(null);
+    }
   };
 
   // props
@@ -157,12 +184,29 @@ function BottleListPage() {
   if (error) return <Alert severity="error">{error}</Alert>;
 
   return (
-    <BottleListView
-      bottleProps={bottleProps}
-      filterProps={filterProps}
-      modalProps={modalProps}
-      uiProps={uiProps}
-    />
+    <>
+      <BottleListView
+        bottleProps={bottleProps}
+        filterProps={filterProps}
+        modalProps={modalProps}
+        uiProps={uiProps}
+      />
+      {/* 通知を表示するコンポーネントを追加 */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={4000}
+        onClose={closeNotification}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={closeNotification}
+          severity={notification.severity}
+          variant="filled"
+        >
+          {notification.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }
 
