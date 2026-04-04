@@ -5,3 +5,5 @@ export { useBottleEdit } from "./useBottleEdit";
 export { useWineWithBottleForm } from "./useWineWithBottleForm";
 export { useModal } from "./useModal";
 export { useWines } from "./useWines";
+export { useBottleActions } from "./useBottleActions";
+export { useBottleUI } from "./useBottleUI";

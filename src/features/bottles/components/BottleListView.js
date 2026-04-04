@@ -18,66 +18,90 @@ import { Modal } from "./Modal";
 import BottleCreateForm from "./BottleCreateForm";
 import WineWithBottleCreateForm from "../../../components/Wine/WineWithBottleCreateForm";
 
-export default function BottleListView(props) {
+export default function BottleListView({
+  bottleProps,
+  filterProps,
+  modalProps,
+  uiProps,
+}) {
+  /* bottle系 */
   const {
-    isMobile,
     bottles,
     filteredBottles,
+    wines,
+
+    form,
+    setForm,
+    creating,
+    onCreateBottle,
+
+    wineWithBottleForm,
+    setWineWithBottleForm,
+    creatingWineWithBottle,
+    onCreateWine,
+
+    editId,
+    editForm,
+    onEditStart,
+    onEditChange,
+    onEditSave,
+    onEditCancel,
+    onDelete,
+  } = bottleProps;
+
+  /* フィルター系 */
+  const {
     filters,
-    setFilterType,
-    setFilterCountry,
-    setFilterRow,
-    setFilterOpened,
-    resetFilters,
-    viewMode,
-    onViewModeChange: handleViewModeChange,
-    onAddBottle: openCreateBottleModal,
-    onAddWine: openCreateWineModal,
+    onFilterTypeChange,
+    onFilterCountryChange,
+    onFilterRowChange,
+    onFilterOpenedChange,
+    onResetFilters,
+  } = filterProps;
+
+  /* モーダル系 */
+  const {
     showCreateBottleModal,
     closeCreateBottleModal,
     showCreateWineModal,
     closeCreateWineModal,
-    form,
-    setForm,
-    creating,
-    wines,
-    onCreateBottleSubmit: handleCreateBottleSubmit,
-    wineWithBottleForm,
-    setWineWithBottleForm,
-    creatingWineWithBottle,
-    onCreateWineSubmit: handleCreateWineWithBottleSubmit,
+  } = modalProps;
+
+  /* UI状態 */
+  const {
+    isMobile,
+    viewMode,
+    onViewModeChange,
     detailBottle,
     setDetailBottle,
-    editId,
-    editForm,
-    onEditStart: handleEditStart,
-    onEditChange: setEditForm,
-    onEditSave: handleEditSave,
-    onEditCancel,
-    onDelete: handleDelete,
-  } = props;
+    closeDetail,
+    onAddBottle,
+    onAddWine,
+  } = uiProps;
 
   return (
     <Box px={isMobile ? 0.5 : 2}>
+      {/* ヘッダー */}
       <Typography variant="h4" gutterBottom fontSize={isMobile ? 22 : 32}>
         ボトル一覧
       </Typography>
 
-      {/* ボトル総数・タイプごとの本数表示 */}
+      {/* 統計 */}
       <BottleStats bottles={bottles} />
 
-      {/* フィルターUI */}
+      {/* フィルター */}
       <BottleFilter
         filters={filters}
-        setFilterType={setFilterType}
-        setFilterCountry={setFilterCountry}
-        setFilterRow={setFilterRow}
-        setFilterOpened={setFilterOpened}
-        resetFilters={resetFilters}
+        setFilterType={onFilterTypeChange}
+        setFilterCountry={onFilterCountryChange}
+        setFilterRow={onFilterRowChange}
+        setFilterOpened={onFilterOpenedChange}
+        resetFilters={onResetFilters}
         bottles={bottles}
         isMobile={isMobile}
       />
 
+      {/* 表示モード切替 */}
       <Box
         sx={{
           display: "flex",
@@ -87,21 +111,22 @@ export default function BottleListView(props) {
           my: 1.5,
         }}
       >
-        <Typography variant="body2" color="text.secondary" component="span">
+        <Typography variant="body2" color="text.secondary">
           表示
         </Typography>
+
         <ToggleButtonGroup
           value={viewMode}
           exclusive
-          onChange={handleViewModeChange}
-          aria-label="ボトル一覧の表示モード"
+          onChange={onViewModeChange}
           size={isMobile ? "small" : "medium"}
         >
-          <ToggleButton value="list" aria-label="リスト表示">
+          <ToggleButton value="list">
             <ViewListIcon sx={{ mr: 0.5, fontSize: 20 }} />
             リスト
           </ToggleButton>
-          <ToggleButton value="visual" aria-label="セラー外観">
+
+          <ToggleButton value="visual">
             <ViewModuleIcon sx={{ mr: 0.5, fontSize: 20 }} />
             セラー
           </ToggleButton>
@@ -111,55 +136,58 @@ export default function BottleListView(props) {
       {/* 追加ボタン */}
       <BottleAddButtons
         isMobile={isMobile}
-        onAddBottle={openCreateBottleModal}
-        onAddWine={openCreateWineModal}
+        onAddBottle={onAddBottle}
+        onAddWine={onAddWine}
       />
 
-      {/* ワイン追加モーダル */}
+      {/* モーダル群 */}
+
+      {/* ワイン + ボトル作成モーダル */}
       <Modal open={showCreateWineModal} onClose={closeCreateWineModal}>
         <WineWithBottleCreateForm
           form={wineWithBottleForm}
           creating={creatingWineWithBottle}
           onChange={setWineWithBottleForm}
-          onSubmit={handleCreateWineWithBottleSubmit}
+          onSubmit={onCreateWine}
         />
       </Modal>
 
-      {/* ボトル追加モーダル */}
+      {/* ボトル作成モーダル */}
       <Modal open={showCreateBottleModal} onClose={closeCreateBottleModal}>
         <BottleCreateForm
           form={form}
           wines={wines}
           creating={creating}
           onChange={setForm}
-          onSubmit={handleCreateBottleSubmit}
+          onSubmit={onCreateBottle}
         />
       </Modal>
 
+      {/* 詳細モーダル */}
       <BottleDetailModal
         open={!!detailBottle}
         bottle={detailBottle}
-        onClose={() => setDetailBottle(null)}
+        onClose={closeDetail}
       />
 
-      {/* ボトル一覧 / セラー外観 */}
+      {/* メイン表示 */}
       {viewMode === "list" ? (
         <BottleList
           bottles={filteredBottles}
           isMobile={isMobile}
-          onBottleDetail={(b) => setDetailBottle(b)}
+          onBottleDetail={setDetailBottle}
           editId={editId}
           editForm={editForm}
-          onEditStart={handleEditStart}
-          onEditChange={setEditForm}
-          onEditSave={handleEditSave}
+          onEditStart={onEditStart}
+          onEditChange={onEditChange}
+          onEditSave={onEditSave}
           onEditCancel={onEditCancel}
-          onDelete={handleDelete}
+          onDelete={onDelete}
         />
       ) : (
         <CellarVisualizer
           bottles={filteredBottles}
-          onBottleSelect={(b) => setDetailBottle(b)}
+          onBottleSelect={setDetailBottle}
         />
       )}
     </Box>
