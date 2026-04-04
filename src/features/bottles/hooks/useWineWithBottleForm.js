@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { createWineWithBottle } from "../../../api/wineApi";
 
+/**
+ * ワインとボトルを同時に作成するためのフォーム状態管理Hook
+ */
 export function useWineWithBottleForm() {
   const [wineWithBottleForm, setWineWithBottleForm] = useState({
     wine: {
@@ -19,6 +22,9 @@ export function useWineWithBottleForm() {
   });
   const [creatingWineWithBottle, setCreatingWineWithBottle] = useState(false);
 
+  /**
+   * フォームの状態を初期値にリセットする
+   */
   const resetForm = () => {
     setWineWithBottleForm({
       wine: {
@@ -37,14 +43,23 @@ export function useWineWithBottleForm() {
     });
   };
 
+  /**
+   * 作成処理の実行
+   * @param {Object} e - イベントオブジェクト（省略可能）
+   * @returns {Promise<Object|null>} 成功時はレスポンスデータ、失敗時はエラーをスロー
+   */
   const handleCreate = async (e) => {
-    e.preventDefault();
+    // イベントオブジェクトが正しく渡された場合のみ preventDefault を実行
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
+    }
+
     setCreatingWineWithBottle(true);
 
     try {
-      const wine = wineWithBottleForm.wine;
-      const bottle = wineWithBottleForm.bottle;
+      const { wine, bottle } = wineWithBottleForm;
 
+      // リクエストデータの整形（数値変換など）
       const requestData = {
         wine: {
           name: wine.name,
@@ -63,10 +78,16 @@ export function useWineWithBottleForm() {
         },
       };
 
-      await createWineWithBottle(requestData);
+      // API実行
+      const response = await createWineWithBottle(requestData);
+
+      // 成功時にフォームをリセット
       resetForm();
-      return true;
+
+      // 呼び出し元で再フェッチ等の処理を行えるよう、レスポンスを返す
+      return response;
     } catch (err) {
+      // エラーは useBottleActions 側の executeWithErrorHandling でキャッチさせるため再スロー
       throw err;
     } finally {
       setCreatingWineWithBottle(false);
