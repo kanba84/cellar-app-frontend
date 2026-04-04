@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTheme } from "@mui/material/styles";
 import { useMediaQuery, Box, CircularProgress, Alert } from "@mui/material";
 
@@ -74,6 +74,18 @@ function BottleListPage() {
   const [viewMode, setViewMode] = useState("list");
   const [detailBottle, setDetailBottle] = useState(null);
 
+  const handleViewModeChange = (_event, next) => {
+    if (next !== null) setViewMode(next);
+  };
+
+  const executeWithErrorHandling = async (fn, onSuccess) => {
+    try {
+      await fn();
+      if (onSuccess) onSuccess();
+    } catch (err) {
+      handleApiError(err);
+    }
+  };
   const handleApiError = (err) => {
     if (isPositionOccupiedError(err)) {
       alert("その棚位置はすでに使用されています");
@@ -83,38 +95,85 @@ function BottleListPage() {
     return false;
   };
 
-  const handleViewModeChange = (_event, next) => {
-    if (next !== null) setViewMode(next);
-  };
-
   // ボトル追加の完全な処理
   const handleCreateBottleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await handleCreateBottle(apiCreateBottle);
-      closeCreateBottleModal();
-    } catch (err) {
-      if (handleApiError(err)) return;
-    }
+    executeWithErrorHandling(
+      () => handleCreateBottle(apiCreateBottle),
+      closeCreateBottleModal,
+    );
   };
 
   // ボトル編集保存の完全な処理
   const handleEditSave = async (id, override) => {
-    try {
-      await hookHandleEditSave(handleUpdateBottle, id, override);
-    } catch (err) {
-      if (handleApiError(err)) return;
-    }
+    executeWithErrorHandling(() =>
+      hookHandleEditSave(handleUpdateBottle, id, override),
+    );
   };
 
   // ワイン追加の完全な処理
   const handleCreateWineWithBottleSubmit = async (e) => {
-    try {
-      await handleCreateWineWithBottle(e);
-      closeCreateWineModal();
-    } catch (err) {
-      if (handleApiError(err)) return;
-    }
+    executeWithErrorHandling(
+      () => handleCreateWineWithBottle(e),
+      closeCreateWineModal,
+    );
+  };
+
+  // props
+  const dataProps = useMemo(
+    () => ({
+      bottles,
+      filteredBottles,
+      wines,
+    }),
+    [bottles, filteredBottles, wines],
+  );
+
+  const filterProps = {
+    filters,
+    setFilterType,
+    setFilterCountry,
+    setFilterRow,
+    setFilterOpened,
+    resetFilters,
+  };
+
+  const createProps = {
+    form,
+    setForm,
+    creating,
+    onCreateBottleSubmit: handleCreateBottleSubmit,
+    wineWithBottleForm,
+    setWineWithBottleForm,
+    creatingWineWithBottle,
+    onCreateWineSubmit: handleCreateWineWithBottleSubmit,
+  };
+
+  const editProps = {
+    editId,
+    editForm,
+    onEditStart: handleEditStart,
+    onEditChange: setEditForm,
+    onEditSave: handleEditSave,
+    onEditCancel: () => handleEditStart(null),
+    onDelete: handleDelete,
+  };
+
+  const modalProps = {
+    showCreateBottleModal,
+    closeCreateBottleModal,
+    showCreateWineModal,
+    closeCreateWineModal,
+  };
+
+  const uiProps = {
+    isMobile,
+    viewMode,
+    onViewModeChange: handleViewModeChange,
+    detailBottle,
+    setDetailBottle,
+    onAddBottle: openCreateBottleModal,
+    onAddWine: openCreateWineModal,
   };
 
   if (loading) {
@@ -129,41 +188,12 @@ function BottleListPage() {
 
   return (
     <BottleListView
-      isMobile={isMobile}
-      bottles={bottles}
-      filteredBottles={filteredBottles}
-      filters={filters}
-      setFilterType={setFilterType}
-      setFilterCountry={setFilterCountry}
-      setFilterRow={setFilterRow}
-      setFilterOpened={setFilterOpened}
-      resetFilters={resetFilters}
-      viewMode={viewMode}
-      onViewModeChange={handleViewModeChange}
-      onAddBottle={openCreateBottleModal}
-      onAddWine={openCreateWineModal}
-      showCreateBottleModal={showCreateBottleModal}
-      closeCreateBottleModal={closeCreateBottleModal}
-      showCreateWineModal={showCreateWineModal}
-      closeCreateWineModal={closeCreateWineModal}
-      form={form}
-      setForm={setForm}
-      creating={creating}
-      wines={wines}
-      onCreateBottleSubmit={handleCreateBottleSubmit}
-      wineWithBottleForm={wineWithBottleForm}
-      setWineWithBottleForm={setWineWithBottleForm}
-      creatingWineWithBottle={creatingWineWithBottle}
-      onCreateWineSubmit={handleCreateWineWithBottleSubmit}
-      detailBottle={detailBottle}
-      setDetailBottle={setDetailBottle}
-      editId={editId}
-      editForm={editForm}
-      onEditStart={handleEditStart}
-      onEditChange={setEditForm}
-      onEditSave={handleEditSave}
-      onEditCancel={() => handleEditStart(null)}
-      onDelete={handleDelete}
+      dataProps={dataProps}
+      filterProps={filterProps}
+      createProps={createProps}
+      editProps={editProps}
+      modalProps={modalProps}
+      uiProps={uiProps}
     />
   );
 }
