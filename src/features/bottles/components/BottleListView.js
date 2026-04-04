@@ -19,40 +19,27 @@ import BottleCreateForm from "./BottleCreateForm";
 import WineWithBottleCreateForm from "../../../components/Wine/WineWithBottleCreateForm";
 
 export default function BottleListView({
-  dataProps,
+  bottleProps,
   filterProps,
-  createProps,
-  editProps,
   modalProps,
   uiProps,
 }) {
-  /* データ系 */
-  const { bottles, filteredBottles, wines } = dataProps;
-
-  /* フィルター系 */
+  /* bottle系 */
   const {
-    filters,
-    setFilterType,
-    setFilterCountry,
-    setFilterRow,
-    setFilterOpened,
-    resetFilters,
-  } = filterProps;
+    bottles,
+    filteredBottles,
+    wines,
 
-  /* 作成系 */
-  const {
     form,
     setForm,
     creating,
-    onCreateBottleSubmit,
+    onCreateBottle,
+
     wineWithBottleForm,
     setWineWithBottleForm,
     creatingWineWithBottle,
-    onCreateWineSubmit,
-  } = createProps;
+    onCreateWine,
 
-  /* 編集系 */
-  const {
     editId,
     editForm,
     onEditStart,
@@ -60,7 +47,17 @@ export default function BottleListView({
     onEditSave,
     onEditCancel,
     onDelete,
-  } = editProps;
+  } = bottleProps;
+
+  /* フィルター系 */
+  const {
+    filters,
+    onFilterTypeChange,
+    onFilterCountryChange,
+    onFilterRowChange,
+    onFilterOpenedChange,
+    onResetFilters,
+  } = filterProps;
 
   /* モーダル系 */
   const {
@@ -77,6 +74,7 @@ export default function BottleListView({
     onViewModeChange,
     detailBottle,
     setDetailBottle,
+    closeDetail,
     onAddBottle,
     onAddWine,
   } = uiProps;
@@ -94,11 +92,11 @@ export default function BottleListView({
       {/* フィルター */}
       <BottleFilter
         filters={filters}
-        setFilterType={setFilterType}
-        setFilterCountry={setFilterCountry}
-        setFilterRow={setFilterRow}
-        setFilterOpened={setFilterOpened}
-        resetFilters={resetFilters}
+        setFilterType={onFilterTypeChange}
+        setFilterCountry={onFilterCountryChange}
+        setFilterRow={onFilterRowChange}
+        setFilterOpened={onFilterOpenedChange}
+        resetFilters={onResetFilters}
         bottles={bottles}
         isMobile={isMobile}
       />
@@ -150,7 +148,7 @@ export default function BottleListView({
           form={wineWithBottleForm}
           creating={creatingWineWithBottle}
           onChange={setWineWithBottleForm}
-          onSubmit={onCreateWineSubmit}
+          onSubmit={onCreateWine}
         />
       </Modal>
 
@@ -161,7 +159,7 @@ export default function BottleListView({
           wines={wines}
           creating={creating}
           onChange={setForm}
-          onSubmit={onCreateBottleSubmit}
+          onSubmit={onCreateBottle}
         />
       </Modal>
 
@@ -169,7 +167,7 @@ export default function BottleListView({
       <BottleDetailModal
         open={!!detailBottle}
         bottle={detailBottle}
-        onClose={() => setDetailBottle(null)}
+        onClose={closeDetail}
       />
 
       {/* メイン表示 */}
