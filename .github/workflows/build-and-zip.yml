@@ -11,10 +11,11 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    # PR が merged=true の場合のみ実行
     if: github.event.pull_request.merged == true
+
     env:
-      REACT_APP_API_BASE_URL: https://cellar-app.local
+      VITE_API_TARGET: https://cellar-app.local # ←変更
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: "22" # ←重要
 
       - name: Install dependencies
         run: npm install
@@ -34,14 +35,14 @@ jobs:
         run: npm run build
 
       - name: Archive build output
-        run: zip -r build-artifact.zip build/
+        run: zip -r build-artifact.zip dist/ # ←ここ変更
 
       - name: Determine release version
         id: determine_version
         run: |
           TITLE="${{ github.event.pull_request.title }}"
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.1.0")
-          TAG=${LATEST_TAG##v}   # 先頭のvをすべて削除
+          TAG=${LATEST_TAG##v}
           MAJOR=$(echo $TAG | cut -d. -f1)
           MINOR=$(echo $TAG | cut -d. -f2)
           PATCH=$(echo $TAG | cut -d. -f3)
@@ -61,18 +62,12 @@ jobs:
           fi
 
           echo "version=v$VERSION" >> $GITHUB_ENV
-          echo "Determined release version: v$VERSION"
-
 
       - name: Create GitHub Release with asset
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.version }}
           name: Release ${{ env.version }}
-          body: |
-            Automated release for version ${{ env.version }}.
-          draft: false
-          prerelease: false
           files: build-artifact.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Typography,
@@ -8,6 +7,12 @@ import {
 import ViewListIcon from "@mui/icons-material/ViewList";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
 
+import type {
+  BottleListViewBottleProps,
+  BottleListViewFilterProps,
+  BottleListViewModalProps,
+  BottleListViewUIProps,
+} from "@/types/hook/bottle";
 import BottleStats from "./BottleStats";
 import BottleFilter from "./BottleFilter";
 import BottleAddButtons from "./BottleAddButtons";
@@ -16,14 +21,21 @@ import CellarVisualizer from "./CellarVisualizer";
 import BottleDetailModal from "./BottleDetailModal";
 import { Modal } from "./Modal";
 import BottleCreateForm from "./BottleCreateForm";
-import WineWithBottleCreateForm from "../../../components/Wine/WineWithBottleCreateForm";
+import WineWithBottleCreateForm from "@/components/Wine/WineWithBottleCreateForm";
+
+interface BottleListViewProps {
+  bottleProps: BottleListViewBottleProps;
+  filterProps: BottleListViewFilterProps;
+  modalProps: BottleListViewModalProps;
+  uiProps: BottleListViewUIProps;
+}
 
 export default function BottleListView({
   bottleProps,
   filterProps,
   modalProps,
   uiProps,
-}) {
+}: BottleListViewProps) {
   /* bottle系 */
   const {
     bottles,

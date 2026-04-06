@@ -1,6 +1,9 @@
 import axios from "axios";
+import type { AxiosInstance } from "axios"; // ← type-only import
 
-let axiosClient = null;
+
+let axiosClient: AxiosInstance | null = null;
+
 
 export async function initAxiosClient() {
   axiosClient = axios.create({

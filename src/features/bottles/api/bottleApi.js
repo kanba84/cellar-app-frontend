@@ -1,5 +1,5 @@
 // src/api/bottleApi.js
-import { getAxiosClient } from "../../../api/axiosClient";
+import { getAxiosClient } from "@/api/axiosClient";
 
 export const fetchBottles = async () => {
   const response = await getAxiosClient().get("/bottles");

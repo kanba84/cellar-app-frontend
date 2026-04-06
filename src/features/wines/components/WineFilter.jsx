@@ -1,4 +1,4 @@
-import FilterPanel from "../../../components/Filter/FilterPanel";
+import FilterPanel from "@/components/Filter/FilterPanel";
 
 function WineFilter({
   filters,

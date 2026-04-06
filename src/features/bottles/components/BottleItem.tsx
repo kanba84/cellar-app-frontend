@@ -6,7 +6,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Switch from "@mui/material/Switch";
-import wineTypeColor from "../../../utils/wineUtils";
+import wineTypeColor from "@/utils/wineUtils";
 import { useNavigate } from "react-router-dom";
 import "flag-icons/css/flag-icons.min.css";
 import MenuItem from "@mui/material/MenuItem";
@@ -31,6 +31,7 @@ function BottleItem({
     if (editId === bottle.id) {
       onEditChange({ ...editForm, is_opened: e.target.checked });
     } else {
+      // トグルのみなので、is_opened だけを送信（PATCH で処理）
       await onEditSave(bottle.id, { is_opened: e.target.checked });
     }
   };
@@ -111,7 +112,7 @@ function BottleItem({
               size="small"
               value={editForm.row_number || ""}
               onChange={(e) =>
-                onEditChange({ ...editForm, row_number: e.target.value })
+                onEditChange({ ...editForm, row_number: e.target.value ? Number(e.target.value) : null })
               }
               sx={{ width: 80 }}
             >
@@ -127,7 +128,7 @@ function BottleItem({
               size="small"
               value={editForm.column_number || ""}
               onChange={(e) =>
-                onEditChange({ ...editForm, column_number: e.target.value })
+                onEditChange({ ...editForm, column_number: e.target.value ? Number(e.target.value) : null })
               }
               sx={{ width: 80 }}
             >

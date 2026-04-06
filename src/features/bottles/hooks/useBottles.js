@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-  fetchBottles as fetchBottlesApi, // API側のfetchBottlesと名前が衝突しないように別名をつける
+  fetchBottles as fetchBottlesApi,
   deleteBottle,
   createBottle,
-  updateBottle,
+  patchBottle,
 } from "../api/bottleApi";
+import { toCreateBottleRequest, toPatchBottleRequest } from "../utils/bottleMapper";
 
 /**
  * ボトル一覧のデータ取得と基本操作を管理するHook
@@ -22,7 +23,12 @@ export function useBottles() {
     try {
       setLoading(true);
       const data = await fetchBottlesApi();
-      setBottles(data);
+      console.log("API Response for bottles:", data, "Type:", typeof data, "Is array:", Array.isArray(data));
+      
+      // APIレスポンスが配列であることを確保
+      // もし { data: [...] } の形式で返されている場合は、data.data を使用
+      const bottleArray = Array.isArray(data) ? data : (data?.data || data?.bottles || []);
+      setBottles(bottleArray);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch bottles:", err);
@@ -57,17 +63,21 @@ export function useBottles() {
    * ボトルの作成（単体）
    */
   const handleCreate = async (data) => {
-    const res = await createBottle(data);
+    const createRequest = toCreateBottleRequest(data);
+    const res = await createBottle(createRequest);
     // 作成後はワイン情報などを含めた最新状態をサーバーから取得し直す
     await loadBottles();
     return res;
   };
 
   /**
-   * ボトルの更新
+   * ボトルの部分更新（PATCH）
+   * 棚位置、開封状態、備考のみの更新に使用
+   * wine_id は不要
    */
   const handleUpdate = async (id, data) => {
-    const res = await updateBottle(id, data);
+    const patchRequest = toPatchBottleRequest(data);
+    const res = await patchBottle(id, patchRequest);
     await loadBottles();
     return res;
   };

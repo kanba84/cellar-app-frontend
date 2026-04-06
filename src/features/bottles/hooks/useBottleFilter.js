@@ -30,6 +30,11 @@ export function useBottleFilter(bottles = []) {
   // useMemo を使ってフィルタ結果をメモ化
   // bottles と filter条件が変わった時だけ再計算する
   const filteredBottles = useMemo(() => {
+    // bottlesが配列であることを確認
+    if (!Array.isArray(bottles)) {
+      console.warn("useBottleFilter: bottles is not an array", bottles);
+      return [];
+    }
     return bottles.filter((bottle) => {
       let ok = true;
       if (filters.type) ok = ok && bottle.wine?.wine_type_name === filters.type;
