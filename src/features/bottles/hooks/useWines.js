@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchWines } from "../../../api/wineApi";
+import { fetchWines } from "@/api/wineApi";
 
 export function useWines() {
   const [wines, setWines] = useState([]);

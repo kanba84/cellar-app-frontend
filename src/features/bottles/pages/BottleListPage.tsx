@@ -99,9 +99,9 @@ function BottleListPage() {
     },
     submitCreateBottle: handleCreateBottle,
     // ワイン＋ボトル同時作成: 成功後に refresh を呼ぶ
-    submitCreateWineWithBottle: async (api) => {
-      // api は handleCreateWineWithBottle に渡される関数
-      const res = await handleCreateWineWithBottle(api);
+    submitCreateWineWithBottle: async () => {
+      // handleCreateWineWithBottle は FormEvent 不要で直接呼び出す
+      const res = await handleCreateWineWithBottle(undefined as any);
       if (res) await refresh();
       return res;
     },
@@ -111,7 +111,7 @@ function BottleListPage() {
   });
 
   // 保存処理の完了後に編集モードを閉じるための調整
-  const onEditSave = async (id, data) => {
+  const onEditSave = async (id: number, data: Partial<import('@/types/api/bottle').Bottle>) => {
     // 修正後の handleEditSave は成功時に値、失敗時に null を返します
     const result = await apiEditSave(id, data);
 

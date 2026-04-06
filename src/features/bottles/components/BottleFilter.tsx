@@ -1,4 +1,21 @@
-import FilterPanel from "../../../components/Filter/FilterPanel";
+import type { Bottle } from "@/types/api/bottle";
+import FilterPanel from "@/components/Filter/FilterPanel";
+
+interface BottleFilterProps {
+  filters: {
+    type: string;
+    country: string;
+    row: string;
+    opened: string;
+  };
+  setFilterType: (value: string) => void;
+  setFilterCountry: (value: string) => void;
+  setFilterRow: (value: string) => void;
+  setFilterOpened: (value: string) => void;
+  resetFilters: () => void;
+  bottles?: Bottle[];
+  isMobile?: boolean;
+}
 
 function BottleFilter({
   filters,
@@ -9,7 +26,7 @@ function BottleFilter({
   resetFilters,
   bottles = [],
   isMobile,
-}) {
+}: BottleFilterProps) {
   // FilterPanel用の統一的な onChange ハンドラ
   const handleFilterChange = (fieldName, value) => {
     switch (fieldName) {

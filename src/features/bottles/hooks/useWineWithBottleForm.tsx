@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createWineWithBottle } from "../../../api/wineApi";
+import { createWineWithBottle } from "@/api/wineApi";
 
 /**
  * ワインとボトルを同時に作成するためのフォーム状態管理Hook

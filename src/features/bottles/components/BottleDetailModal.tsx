@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import wineTypeColor from "../../../utils/wineUtils";
+import wineTypeColor from "@/utils/wineUtils";
 import "./BottleDetailModal.css";
 
 function formatVintage(wine) {
