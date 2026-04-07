@@ -1,7 +1,12 @@
 import { Box, Typography, Stack } from "@mui/material";
+import type { Bottle } from "@/types/api/bottle";
 
-function BottleStats({ bottles }) {
-  const typeCounts = bottles.reduce((acc, bottle) => {
+interface BottleStatsProps {
+  bottles: Bottle[];
+}
+
+function BottleStats({ bottles }: BottleStatsProps) {
+  const typeCounts = bottles.reduce((acc: Record<string, number>, bottle: Bottle) => {
     const type = bottle.wine?.wine_type_name || "不明";
     acc[type] = (acc[type] || 0) + 1;
     return acc;

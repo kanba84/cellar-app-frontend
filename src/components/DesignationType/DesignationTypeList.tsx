@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   createDesignationType,
   deleteDesignationType,
@@ -15,7 +15,7 @@ import {
 
 import DesignationTypeCreateForm from "./DesignationTypeCreateForm";
 
-function DesignationTypeList({ designationTypes, onDesignationTypeChanged }) {
+function DesignationTypeList({ designationTypes, onDesignationTypeChanged }: any) {
   const [form, setForm] = useState({
     name: "",
     code: "",

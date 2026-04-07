@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef} from "react";
+import { useEffect, useState, useRef} from "react";
 import { useParams } from "react-router-dom";
 import { fetchWineById, updateWine } from "../api/wineApi";
 import { fetchWineTypes } from "../api/wineTypeApi";
@@ -18,18 +18,18 @@ import Alert from "@mui/material/Alert";
 
 function WineDetailPage() {
   const { id } = useParams();
-  const [wine, setWine] = useState(null);
-  const [editForm, setEditForm] = useState(null);
+  const [wine, setWine] = useState<any>(null);
+  const [editForm, setEditForm] = useState<any>(null);
   const [editing, setEditing] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<any>(null);
 
-  const [wineTypes, setWineTypes] = useState([]);
-  const [countries, setCountries] = useState([]);
-  const [regions, setRegions] = useState([]);
-  const [appellations, setAppellations] = useState([]);
+  const [wineTypes, setWineTypes] = useState<any[]>([]);
+  const [countries, setCountries] = useState<any[]>([]);
+  const [regions, setRegions] = useState<any[]>([]);
+  const [appellations, setAppellations] = useState<any[]>([]);
 
-  const fileInputRef = useRef(null); // ファイル入力を制御するref
-  const pollingRef = useRef(null); // ポーリング用のref
+  const fileInputRef = useRef<HTMLInputElement>(null); // ファイル入力を制御するref
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null); // ポーリング用のref
 
   useEffect(() => {
     fetchWineById(id)
@@ -53,12 +53,14 @@ useEffect(() => {
       // まだ本物URLでないならポーリング開始
       pollingRef.current = setInterval(async () => {
         try {
-          const updated = await fetchWineById(id);
+          const updated = await fetchWineById(id as string | undefined);
           setWine(updated);
 
           const nowReal = updated.label_image_url && !updated.label_image_url.includes("temp_thumbnail");
           if (nowReal) {
-            clearInterval(pollingRef.current);
+            if (pollingRef.current) {
+              clearInterval(pollingRef.current);
+            }
             pollingRef.current = null;
           }
         } catch (err) {
@@ -76,7 +78,7 @@ useEffect(() => {
     };
   }, [wine?.label_image_url, id]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
     const parsedValue = [
       "wine_type_id",
@@ -108,7 +110,7 @@ useEffect(() => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
 
     // 必要なフィールドだけを抽出
@@ -135,7 +137,7 @@ useEffect(() => {
     }
   };
 
-const handleLabelImageChange = async (e) => {
+const handleLabelImageChange = async (e: any) => {
   const file = e.target.files?.[0];
   if (!file) return;
 
@@ -170,7 +172,7 @@ const handleLabelImageChange = async (e) => {
  * @param {number} quality - 0〜1 (JPEG圧縮品質)
  * @returns {Promise<Blob>} JPEG Blob
  */
-async function convertToJpeg(file, quality = 0.9) {
+async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const reader = new FileReader();
@@ -181,6 +183,10 @@ async function convertToJpeg(file, quality = 0.9) {
         canvas.width = img.width;
         canvas.height = img.height;
         const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Canvas context not available"));
+          return;
+        }
         ctx.drawImage(img, 0, 0);
         canvas.toBlob(
           (blob) => {
@@ -195,7 +201,7 @@ async function convertToJpeg(file, quality = 0.9) {
         console.error("Image load error:", e);
         reject(e);
       };
-      img.src = event.target.result;
+      img.src = (event.target?.result as string) || "";
     };
 
     reader.onerror = (e) => {

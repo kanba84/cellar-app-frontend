@@ -3,7 +3,6 @@ import type { Wine } from '@/types/api/wine';
 import type { Bottle } from '@/types/api/bottle';
 import type {
   WineWithBottleFormState,
-  WineWithBottleFormSubmitData,
   CreateWineWithBottleRequest,
 } from '@/types/form/wineWithBottle';
 import type { UseWineWithBottleFormReturn } from '@/types/hook/wine';
@@ -21,8 +20,10 @@ export function useWineWithBottleForm(): UseWineWithBottleFormReturn {
       country_id: '',
       region_id: '',
       producer: '',
+      appellation_id: '',
     },
     bottle: {
+      wine_id: '',
       row_number: '',
       column_number: '',
       note: '',
@@ -42,8 +43,10 @@ export function useWineWithBottleForm(): UseWineWithBottleFormReturn {
         country_id: '',
         region_id: '',
         producer: '',
+        appellation_id: '',
       },
       bottle: {
+        wine_id: '',
         row_number: '',
         column_number: '',
         note: '',
@@ -74,6 +77,7 @@ export function useWineWithBottleForm(): UseWineWithBottleFormReturn {
           country_id: wine.country_id ? Number(wine.country_id) : null,
           region_id: wine.region_id ? Number(wine.region_id) : null,
           producer: wine.producer || null,
+          appellation_id: wine.appellation_id ? Number(wine.appellation_id) : null,
         },
         bottle: {
           wine_id: 0, // TODO: API側の仕様確認 - ワイン作成後の自動割り当てか

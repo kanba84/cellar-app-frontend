@@ -9,6 +9,7 @@ export function useBottleListViewModel(bottles: Bottle[]): UseBottleListViewMode
   // グループ化
   const rowGroups = bottles.reduce<Record<string | number, Bottle[]>>((acc, bottle) => {
     const row = bottle.row_number;
+    if (row === null || row === undefined) return acc;
     if (!acc[row]) acc[row] = [];
     acc[row].push(bottle);
     return acc;

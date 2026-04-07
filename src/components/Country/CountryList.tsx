@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { createCountry, deleteCountry } from "../../api/countryApi";
 
@@ -15,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 
-function CountryList({ countries, onCountryChanged }) {
+function CountryList({ countries, onCountryChanged }: any) {
   const [form, setForm] = useState({
     name: "",
     iso_code: "",

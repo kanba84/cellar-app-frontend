@@ -13,7 +13,7 @@ export interface WineFormState {
   country_id: string | number | '';
   region_id: string | number | '';
   producer: string;
-  appellation_id: string | number | '';
+  appellation_id?: string | number | '';
   // TODO: label_image_url の挙動確認（アップロード or URL入力か）
 }
 
@@ -24,8 +24,8 @@ export interface WineFormState {
 export interface WineFormSubmitData {
   name: string;
   vintage: number | null;
-  wine_type_id: number;
-  country_id: number;
+  wine_type_id: number | null;
+  country_id: number | null;
   region_id: number | null;
   producer: string | null;
   appellation_id: number | null;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 //import { fetchCountries } from '../../api/countryApi';
 import { fetchRegions } from "../../api/regionApi";
 import { fetchDesignationTypes } from "../../api/designationTypeApi";
@@ -14,9 +14,9 @@ function AppellationCreateForm({
   creating,
   onChange,
   onSubmit,
-}) {
-  const [designationTypes, setDesignationTypes] = useState([]);
-  const [regions, setRegions] = useState([]);
+}: any) {
+  const [designationTypes, setDesignationTypes] = useState<any[]>([]);
+  const [regions, setRegions] = useState<any[]>([]);
 
   useEffect(() => {
     fetchDesignationTypes().then(setDesignationTypes);

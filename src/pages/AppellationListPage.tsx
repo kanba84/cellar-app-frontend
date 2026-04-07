@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchAppellations } from "../api/appellationApi";
 import AppellationList from "../components/Appellation/AppellationList";
 
@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 
 function AppellationListPage() {
-  const [appellations, setAppellations] = useState([]);
+  const [appellations, setAppellations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
 

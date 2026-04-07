@@ -13,6 +13,7 @@ import {
   useWines,
 } from "../hooks";
 import BottleListView from "../components/BottleListView";
+import type { Bottle } from "@/types/api/bottle";
 
 function BottleListPage() {
   // カスタムフックの使用
@@ -111,7 +112,7 @@ function BottleListPage() {
   });
 
   // 保存処理の完了後に編集モードを閉じるための調整
-  const onEditSave = async (id: number, data: Partial<import('@/types/api/bottle').Bottle>) => {
+  const onEditSave = async (id: number, data: Partial<Bottle>) => {
     // 修正後の handleEditSave は成功時に値、失敗時に null を返します
     const result = await apiEditSave(id, data);
 

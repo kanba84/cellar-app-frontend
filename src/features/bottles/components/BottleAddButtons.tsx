@@ -1,6 +1,12 @@
 import { Button, Stack } from "@mui/material";
 
-function BottleAddButtons({ isMobile, onAddBottle, onAddWine }) {
+interface BottleAddButtonsProps {
+  isMobile: boolean;
+  onAddBottle: () => void;
+  onAddWine: () => void;
+}
+
+function BottleAddButtons({ isMobile, onAddBottle, onAddWine }: BottleAddButtonsProps) {
   return (
     <Stack direction={isMobile ? "column" : "row"} spacing={2} sx={{ mb: 2 }}>
       <Button variant="contained" onClick={onAddWine} fullWidth={isMobile}>

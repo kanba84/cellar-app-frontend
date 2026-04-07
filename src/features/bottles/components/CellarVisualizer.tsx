@@ -1,19 +1,16 @@
 // src/components/CellarVisualizer.jsx
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, IconButton, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import type { Bottle } from '@/types/api/bottle';
 import './CellarVisualizer.css';
 
 /** BottleItem の棚 UI と同じ（行 1–9、列 1–7） */
 const SHELF_ROW_COUNT = 9;
 const SHELF_COL_COUNT = 7;
 
-/**
- * API の bottle.wine.wine_type_name からセラー用 CSS クラスへ
- * （wineUtils の Red / White / Sparkling および日本語表記に対応）
- */
-function getWineVisualClass(bottle) {
+function getWineVisualClass(bottle: Bottle | null): string {
   const raw = bottle?.wine?.wine_type_name;
   if (raw == null || raw === '') return 'red';
   const t = String(raw).trim().toLowerCase();
@@ -32,7 +29,7 @@ function getWineVisualClass(bottle) {
   return 'red';
 }
 
-function buildShelfGrid(bottles) {
+function buildShelfGrid(bottles: Bottle[]): (Bottle | null)[][] {
   const grid = Array.from({ length: SHELF_ROW_COUNT }, () =>
     Array(SHELF_COL_COUNT).fill(null)
   );
@@ -54,7 +51,11 @@ function buildShelfGrid(bottles) {
   return grid;
 }
 
-const Bottle = ({ position }) => (
+interface BottleComponentProps {
+  position: 'front' | 'back';
+}
+
+const Bottle = ({ position }: BottleComponentProps) => (
   <div className="bottle-body">
     {position === 'front' ? (
       <div className="bottle-bottom">
@@ -66,12 +67,18 @@ const Bottle = ({ position }) => (
   </div>
 );
 
-const Slot = ({ bottle, position, onBottleSelect }) => {
+interface SlotProps {
+  bottle: Bottle | null;
+  position: 'front' | 'back';
+  onBottleSelect?: (bottle: Bottle) => void;
+}
+
+const Slot = ({ bottle, position, onBottleSelect }: SlotProps) => {
   const visualClass = bottle ? getWineVisualClass(bottle) : 'empty';
   return (
     <div
       className={`slot ${visualClass} ${position}`}
-      onClick={(e) => {
+      onClick={(e: React.MouseEvent) => {
         if (bottle && onBottleSelect) {
           e.stopPropagation();
           onBottleSelect(bottle);
@@ -84,7 +91,13 @@ const Slot = ({ bottle, position, onBottleSelect }) => {
   );
 };
 
-const DetailedBottle = ({ bottle, isReverse, onBottleSelect }) => {
+interface DetailedBottleProps {
+  bottle: Bottle | null;
+  isReverse: boolean;
+  onBottleSelect?: (bottle: Bottle) => void;
+}
+
+const DetailedBottle = ({ bottle, isReverse, onBottleSelect }: DetailedBottleProps) => {
   if (!bottle) {
     return <div className="detailed-bottle-empty" aria-hidden />;
   }
@@ -128,9 +141,9 @@ const DetailedBottle = ({ bottle, isReverse, onBottleSelect }) => {
   );
 };
 
-function useFitWidthScale(grid, selectedShelf, bottleCount) {
-  const outerRef = useRef(null);
-  const innerRef = useRef(null);
+function useFitWidthScale(grid: (Bottle | null)[][], selectedShelf: number | null, bottleCount: number | undefined) {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
   const [layout, setLayout] = useState({ scale: 1, ih: 0, iw: 0 });
 
   useLayoutEffect(() => {
@@ -170,8 +183,13 @@ function useFitWidthScale(grid, selectedShelf, bottleCount) {
   return { outerRef, innerRef, scale: layout.scale, ih: layout.ih };
 }
 
-const CellarVisualizer = ({ bottles, onBottleSelect }) => {
-  const [selectedShelf, setSelectedShelf] = useState(null);
+interface CellarVisualizerProps {
+  bottles: Bottle[];
+  onBottleSelect?: (bottle: Bottle) => void;
+}
+
+const CellarVisualizer = ({ bottles, onBottleSelect }: CellarVisualizerProps) => {
+  const [selectedShelf, setSelectedShelf] = useState<number | null>(null);
 
   const grid = useMemo(() => buildShelfGrid(bottles ?? []), [bottles]);
 

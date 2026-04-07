@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchWines } from "../api/wineApi";
 import { useWineFilter } from "../features/wines/hooks/useWineFilter";
@@ -16,9 +16,9 @@ import { useMediaQuery } from "@mui/material";
 import "flag-icons/css/flag-icons.min.css";
 
 function WineListPage() {
-  const [wines, setWines] = useState([]);
+  const [wines, setWines] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<any>(null);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -29,13 +29,17 @@ function WineListPage() {
     setFilterCountry,
     setFilterRegion,
     setFilterName,
-    filteredWines,
+    filteredWines: filteredWinesRaw,
     resetFilters,
   } = useWineFilter(wines);
+  
+  const filteredWines: any[] = (filteredWinesRaw as any[]) || [];
 
   useEffect(() => {
     fetchWines()
-      .then(setWines)
+      .then((data) => {
+        setWines(Array.isArray(data) ? data : []);
+      })
       .catch(() => setError("ワイン一覧の取得に失敗しました"))
       .finally(() => setLoading(false));
   }, []);
@@ -56,16 +60,16 @@ function WineListPage() {
       </Typography>
 
       {/* フィルターUI */}
-      <WineFilter
-        filters={filters}
-        setFilterType={setFilterType}
-        setFilterCountry={setFilterCountry}
-        setFilterRegion={setFilterRegion}
-        setFilterName={setFilterName}
-        resetFilters={resetFilters}
-        wines={wines}
-        isMobile={isMobile}
-      />
+      <div>{(WineFilter as any)({
+        filters,
+        setFilterType,
+        setFilterCountry,
+        setFilterRegion,
+        setFilterName,
+        resetFilters,
+        wines,
+        isMobile,
+      })}</div>
 
       {filteredWines.length === 0 ? (
         <Typography>

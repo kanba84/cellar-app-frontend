@@ -1,4 +1,3 @@
-import React from "react";
 import ListItem from "@mui/material/ListItem";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -10,6 +9,19 @@ import wineTypeColor from "@/utils/wineUtils";
 import { useNavigate } from "react-router-dom";
 import "flag-icons/css/flag-icons.min.css";
 import MenuItem from "@mui/material/MenuItem";
+import type { Bottle } from "@/types/api/bottle";
+
+interface BottleItemProps {
+  bottle: Bottle;
+  editId: number | null;
+  editForm: Partial<Bottle>;
+  onEditStart: (bottle: Bottle) => void;
+  onEditChange: (form: Partial<Bottle>) => void;
+  onEditSave: (bottleId: number, form: Partial<Bottle>) => Promise<void>;
+  onEditCancel: () => void;
+  onDelete: (bottleId: number) => void;
+  onBottleDetail?: (bottle: Bottle) => void;
+}
 
 function BottleItem({
   bottle,
@@ -21,12 +33,13 @@ function BottleItem({
   onEditCancel,
   onDelete,
   onBottleDetail,
-}) {
-  const nameColor = wineTypeColor[bottle.wine?.wine_type_name] || "inherit";
+}: BottleItemProps) {
+  const wineTypeName = bottle.wine?.wine_type_name;
+  const nameColor = wineTypeName ? wineTypeColor[wineTypeName as keyof typeof wineTypeColor] : "inherit";
   const itemBgColor = bottle.is_opened ? "#e0e0e0" : "#fafafa";
   const navigate = useNavigate();
 
-  const handleOpenedToggle = async (e) => {
+  const handleOpenedToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
     if (editId === bottle.id) {
       onEditChange({ ...editForm, is_opened: e.target.checked });
@@ -54,7 +67,7 @@ function BottleItem({
           component="img"
           src={bottle.wine?.label_image_url || "/labels/sample_thumbnail.png"}
           alt={`${bottle.wine?.name} ラベル`}
-          onClick={(e) => {
+          onClick={(e: React.MouseEvent) => {
             if (onBottleDetail) {
               e.stopPropagation();
               onBottleDetail(bottle);
@@ -110,9 +123,9 @@ function BottleItem({
               select
               label="棚 行"
               size="small"
-              value={editForm.row_number || ""}
+              value={String(editForm.row_number || "")}
               onChange={(e) =>
-                onEditChange({ ...editForm, row_number: e.target.value ? Number(e.target.value) : null })
+                onEditChange({ ...editForm, row_number: e.target.value ? Number(e.target.value) : undefined })
               }
               sx={{ width: 80 }}
             >
@@ -126,9 +139,9 @@ function BottleItem({
               select
               label="棚 列"
               size="small"
-              value={editForm.column_number || ""}
+              value={String(editForm.column_number || "")}
               onChange={(e) =>
-                onEditChange({ ...editForm, column_number: e.target.value ? Number(e.target.value) : null })
+                onEditChange({ ...editForm, column_number: e.target.value ? Number(e.target.value) : undefined })
               }
               sx={{ width: 80 }}
             >
@@ -190,7 +203,7 @@ function BottleItem({
                 variant="contained"
                 color="primary"
                 size="small"
-                onClick={async (e) => {
+                onClick={async (e: React.MouseEvent) => {
                   e.stopPropagation();
                   await onEditSave(bottle.id, editForm);
                 }}
@@ -201,7 +214,7 @@ function BottleItem({
                 variant="outlined"
                 color="inherit"
                 size="small"
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   onEditCancel();
                 }}
@@ -215,7 +228,7 @@ function BottleItem({
                 variant="outlined"
                 color="primary"
                 size="small"
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   onEditStart(bottle);
                 }}
@@ -226,7 +239,7 @@ function BottleItem({
                 variant="outlined"
                 color="error"
                 size="small"
-                onClick={(e) => {
+                onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   onDelete(bottle.id);
                 }}

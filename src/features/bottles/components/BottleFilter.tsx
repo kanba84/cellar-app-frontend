@@ -1,6 +1,8 @@
 import type { Bottle } from "@/types/api/bottle";
 import FilterPanel from "@/components/Filter/FilterPanel";
 
+const TypedFilterPanel = FilterPanel as any;
+
 interface BottleFilterProps {
   filters: {
     type: string;
@@ -28,7 +30,7 @@ function BottleFilter({
   isMobile,
 }: BottleFilterProps) {
   // FilterPanel用の統一的な onChange ハンドラ
-  const handleFilterChange = (fieldName, value) => {
+  const handleFilterChange = (fieldName: string, value: string): void => {
     switch (fieldName) {
       case "type":
         setFilterType(value);
@@ -96,13 +98,13 @@ function BottleFilter({
   ];
 
   return (
-    <FilterPanel
+    <TypedFilterPanel
       filters={filters}
       onChange={handleFilterChange}
       filterFields={filterFields}
       onReset={resetFilters}
       isMobile={isMobile}
-    />
+    /> as any
   );
 }
 

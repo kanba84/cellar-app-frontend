@@ -6,12 +6,36 @@ import {
   Collapse,
   IconButton,
 } from "@mui/material";
-import React from "react";
 import BottleItem from "./BottleItem";
 import { useBottleListViewModel } from "../hooks/useBottleListViewModel";
 import { ExpandMore, ExpandLess } from "@mui/icons-material";
+import type { Bottle } from "@/types/api/bottle";
 
-function BottleList({ bottles, isMobile, onBottleDetail, ...editHandlers }) {
+interface BottleListProps {
+  bottles: Bottle[];
+  isMobile?: boolean;
+  onBottleDetail?: (bottle: Bottle) => void;
+  editId: number | null;
+  editForm: Partial<Bottle>;
+  onEditStart: (bottle: Bottle) => void;
+  onEditChange: (form: Partial<Bottle>) => void;
+  onEditSave: (bottleId: number, form: Partial<Bottle>) => Promise<void>;
+  onEditCancel: () => void;
+  onDelete: (bottleId: number) => void;
+}
+
+function BottleList({
+  bottles,
+  isMobile,
+  onBottleDetail,
+  editId,
+  editForm,
+  onEditStart,
+  onEditChange,
+  onEditSave,
+  onEditCancel,
+  onDelete,
+}: BottleListProps) {
   const { rowGroups, sortedRows, openRows, toggleRow } =
     useBottleListViewModel(bottles);
 
@@ -25,7 +49,7 @@ function BottleList({ bottles, isMobile, onBottleDetail, ...editHandlers }) {
         const bottlesInRow = rowGroups[row];
         const groupColor = index % 2 === 0 ? "#f5f5f5" : "#fff";
         return (
-          <React.Fragment key={row}>
+          <div key={row}>
             <Divider sx={{ my: 1 }} />
             {/* 行ヘッダー */}
             <Box
@@ -74,13 +98,19 @@ function BottleList({ bottles, isMobile, onBottleDetail, ...editHandlers }) {
                   >
                     <BottleItem
                       bottle={bottle}
+                      editId={editId}
+                      editForm={editForm}
+                      onEditStart={onEditStart}
+                      onEditChange={onEditChange}
+                      onEditSave={onEditSave}
+                      onEditCancel={onEditCancel}
+                      onDelete={onDelete}
                       onBottleDetail={onBottleDetail}
-                      {...editHandlers}
                     />
                   </Box>
                 ))}
             </Collapse>
-          </React.Fragment>
+          </div>
         );
       })}
     </List>

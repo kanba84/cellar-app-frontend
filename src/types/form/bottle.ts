@@ -11,6 +11,8 @@ export interface BottleFormState {
   row_number: string | number | '';
   column_number: string | number | '';
   note: string;
+  is_opened?: boolean;  // フォーム専用フィールド（編集時のトグル用）
+  // フォーム専用フィールド（BottleFormSubmitData への変換時は除外）
 }
 
 /**

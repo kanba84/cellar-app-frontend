@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchRegions, createRegion, deleteRegion } from "../../api/regionApi";
 import Box from "@mui/material/Box";
@@ -14,10 +14,15 @@ import Stack from "@mui/material/Stack";
 function RegionList({
   parentId,
   countryId,
-  parentRegion,
   onRegionAddedOrDeleted,
+  reloadKey,
+}: {
+  parentId?: any;
+  countryId?: any;
+  onRegionAddedOrDeleted?: any;
+  reloadKey?: any;
 }) {
-  const [regions, setRegions] = useState([]);
+  const [regions, setRegions] = useState<any[]>([]);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -32,7 +37,7 @@ function RegionList({
       setRegions(filtered);
       setLoading(false);
     });
-  }, [parentId, countryId, onRegionAddedOrDeleted]);
+  }, [parentId, countryId, onRegionAddedOrDeleted, reloadKey]);
 
   const handleAdd = async (e) => {
     e.preventDefault();

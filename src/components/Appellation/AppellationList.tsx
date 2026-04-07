@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { createAppellation, deleteAppellation } from "../../api/appellationApi";
 
 import {
@@ -12,7 +12,7 @@ import {
 
 import AppellationCreateForm from "./AppellationCreateForm";
 
-function AppellationList({ appellations, onAppellationChanged }) {
+function AppellationList({ appellations, onAppellationChanged }: any) {
   const [appellationForm, setAppellationForm] = useState({
     name: "",
     designation_type_id: "",

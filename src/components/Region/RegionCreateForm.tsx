@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchCountries } from "../../api/countryApi";
 import { fetchRegions } from "../../api/regionApi";
 import { createRegion } from "../../api/regionApi";
 
-function RegionCreateForm({ onCreated }) {
+function RegionCreateForm({ onCreated }: any) {
   const [name, setName] = useState("");
   const [countryId, setCountryId] = useState("");
   const [parentId, setParentId] = useState("");
-  const [countries, setCountries] = useState([]);
-  const [regions, setRegions] = useState([]);
+  const [countries, setCountries] = useState<any[]>([]);
+  const [regions, setRegions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
