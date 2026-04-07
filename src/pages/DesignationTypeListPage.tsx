@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchDesignationTypes } from "../api/designationTypeApi";
 import DesignationTypeList from "../components/DesignationType/DesignationTypeList";
 
@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 
 function DesignationTypeListPage() {
-  const [designationTypes, setDesignationTypes] = useState([]);
+  const [designationTypes, setDesignationTypes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
 

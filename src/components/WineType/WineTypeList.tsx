@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { createWineType, deleteWineType } from "../../api/wineTypeApi";
 
 import {
@@ -13,7 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 
-function WineTypeList({ wineTypes, onWineTypeChanged }) {
+function WineTypeList({ wineTypes, onWineTypeChanged }: any) {
   const [form, setForm] = useState({
     name: "",
   });

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchCountries } from "../api/countryApi";
 import { fetchRegions } from "../api/regionApi";
@@ -11,19 +11,19 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 function RegionListPage() {
   const { countryId, regionId } = useParams();
-  const [country, setCountry] = useState(null);
-  const [region, setRegion] = useState(null);
+  const [country, setCountry] = useState<any>(null);
+  const [region, setRegion] = useState<any>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchCountries().then((data) => {
-      const countryData = data.find((c) => c.id === Number(countryId));
+    fetchCountries().then((data: any) => {
+      const countryData = data.find((c: any) => c.id === Number(countryId));
       setCountry(countryData);
     });
     if (regionId) {
-      fetchRegions().then((data) => {
-        const regionData = data.find((r) => r.id === Number(regionId));
+      fetchRegions().then((data: any) => {
+        const regionData = data.find((r: any) => r.id === Number(regionId));
         setRegion(regionData);
       });
     } else {
@@ -58,7 +58,6 @@ function RegionListPage() {
       <RegionList
         parentId={region ? region.id : null}
         countryId={country.id}
-        parentRegion={region}
         onRegionAddedOrDeleted={() => setReloadKey((k) => k + 1)}
         reloadKey={reloadKey}
       />

@@ -1,10 +1,21 @@
-import React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
+import type { Wine } from "@/types/api/wine";
+import type { BottleFormState } from "@/types/form/bottle";
+
+interface BottleCreateFormProps {
+  form: BottleFormState;
+  wines: Wine[];
+  creating: boolean;
+  onChange: (form: BottleFormState) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  hideWineSelect?: boolean;
+  showSubmitButton?: boolean;
+}
 
 function BottleCreateForm({
   form,
@@ -14,7 +25,7 @@ function BottleCreateForm({
   onSubmit,
   hideWineSelect = false,
   showSubmitButton = true,
-}) {
+}: BottleCreateFormProps) {
   const inputFontSize = { xs: 13, sm: 16 };
 
   return (

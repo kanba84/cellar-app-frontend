@@ -6,7 +6,6 @@ import type { Wine } from '../api/wine';
 import type { Bottle } from '../api/bottle';
 import type {
   WineWithBottleFormState,
-  WineWithBottleFormSubmitData,
 } from '../form/wineWithBottle';
 
 /**

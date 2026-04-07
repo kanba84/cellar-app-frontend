@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchCountries } from "../../api/countryApi";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -7,8 +7,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
-function DesignationTypeCreateForm({ form, creating, onChange, onSubmit }) {
-  const [countries, setCountries] = useState([]);
+function DesignationTypeCreateForm({ form, creating, onChange, onSubmit }: any) {
+  const [countries, setCountries] = useState<any[]>([]);
 
   useEffect(() => {
     fetchCountries().then(setCountries);

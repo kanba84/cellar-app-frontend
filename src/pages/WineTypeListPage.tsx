@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchWineTypes } from "../api/wineTypeApi";
 import WineTypeList from "../components/WineType/WineTypeList";
 
@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 
 function WineTypeListPage() {
-  const [wineTypes, setWineTypes] = useState([]);
+  const [wineTypes, setWineTypes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
 

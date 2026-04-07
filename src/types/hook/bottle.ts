@@ -109,7 +109,7 @@ export interface BottleListViewBottleProps {
   editForm: Partial<Bottle>;
   onEditStart: (bottle: Bottle | null) => void;
   onEditChange: (form: Partial<Bottle>) => void;
-  onEditSave: (id: number, data: Partial<Bottle>) => Promise<void | null>;
+  onEditSave: (id: number, data: Partial<Bottle>) => Promise<void>;
   onEditCancel: () => void;
   onDelete: (id: number) => Promise<boolean>;
 }

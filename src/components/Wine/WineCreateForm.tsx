@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchCountries } from "../../api/countryApi";
 import { fetchRegions } from "../../api/regionApi";
 import { fetchWineTypes } from "../../api/wineTypeApi";
@@ -15,10 +15,10 @@ function WineCreateForm({
   onChange,
   onSubmit,
   showSubmitButton = true,
-}) {
-  const [countries, setCountries] = useState([]);
-  const [regions, setRegions] = useState([]);
-  const [wineTypes, setWineTypes] = useState([]);
+}: any) {
+  const [countries, setCountries] = useState<any[]>([]);
+  const [regions, setRegions] = useState<any[]>([]);
+  const [wineTypes, setWineTypes] = useState<any[]>([]);
 
   const filteredRegions = regions.filter(
     (region) => region.country_id === wineForm.country_id,

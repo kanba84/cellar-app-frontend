@@ -2,22 +2,30 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import wineTypeColor from "@/utils/wineUtils";
+import type { Bottle } from "@/types/api/bottle";
+import type { Wine } from "@/types/api/wine";
 import "./BottleDetailModal.css";
 
-function formatVintage(wine) {
-  if (wine?.vintage == null || wine?.vintage === "") return "—";
+function formatVintage(wine: Wine | undefined): string {
+  if (wine?.vintage == null) return "—";
   return `${wine.vintage}年`;
+}
+
+interface BottleDetailModalProps {
+  open: boolean;
+  bottle: Bottle | null;
+  onClose: () => void;
 }
 
 /**
  * セラー／リスト共通のボトル詳細モーダル（cellar-ui のモーダル相当）
  */
-function BottleDetailModal({ open, bottle, onClose }) {
+function BottleDetailModal({ open, bottle, onClose }: BottleDetailModalProps) {
   const wine = bottle?.wine;
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e) => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose?.();
     };
     window.addEventListener("keydown", onKey);
@@ -40,7 +48,7 @@ function BottleDetailModal({ open, bottle, onClose }) {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 30 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
             <button
               type="button"
@@ -64,7 +72,7 @@ function BottleDetailModal({ open, bottle, onClose }) {
               <div className="wine-card-info">
                 <h3
                   style={{
-                    color: wineTypeColor[wine?.wine_type_name] || "inherit",
+                    color: wine?.wine_type_name ? wineTypeColor[wine.wine_type_name as keyof typeof wineTypeColor] : "inherit",
                   }}
                 >
                   {wine?.name || "ワイン名不明"}

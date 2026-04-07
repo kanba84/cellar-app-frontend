@@ -1,9 +1,9 @@
-import React from "react";
+
 import WineCreateForm from "./WineCreateForm";
 import BottleCreateForm from "../../features/bottles/components/BottleCreateForm";
 import { Box, Button, Stack } from "@mui/material";
 
-function WineWithBottleCreateForm({ form, creating, onChange, onSubmit }) {
+function WineWithBottleCreateForm({ form, creating, onChange, onSubmit }: any) {
   return (
     <Box sx={{ fontSize: { xs: 10, sm: 14 } }}>
       <form onSubmit={onSubmit}>
@@ -21,6 +21,7 @@ function WineWithBottleCreateForm({ form, creating, onChange, onSubmit }) {
             creating={creating}
             wines={[]}
             onChange={(bottleForm) => onChange({ ...form, bottle: bottleForm })}
+            onSubmit={() => {}}
             hideWineSelect
             showSubmitButton={false}
           />
