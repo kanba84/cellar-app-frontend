@@ -17,7 +17,8 @@ import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
 
 function WineDetailPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
+  const wineId = id ? Number(id) : undefined;
   const [wine, setWine] = useState<any>(null);
   const [editForm, setEditForm] = useState<any>(null);
   const [editing, setEditing] = useState(false);
@@ -32,7 +33,8 @@ function WineDetailPage() {
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null); // ポーリング用のref
 
   useEffect(() => {
-    fetchWineById(id)
+    if (!wineId) return;
+    fetchWineById(wineId)
       .then((data) => {
         setWine(data);
         setEditForm(data);
@@ -42,7 +44,7 @@ function WineDetailPage() {
     fetchCountries().then(setCountries);
     fetchRegions().then(setRegions);
     fetchAppellations().then(setAppellations);
-  }, [id]);
+  }, [wineId]);
 
   // --- ポーリング監視用 useEffect ---
 useEffect(() => {
@@ -53,7 +55,8 @@ useEffect(() => {
       // まだ本物URLでないならポーリング開始
       pollingRef.current = setInterval(async () => {
         try {
-          const updated = await fetchWineById(id as string | undefined);
+          if (!wineId) return;
+          const updated = await fetchWineById(wineId);
           setWine(updated);
 
           const nowReal = updated.label_image_url && !updated.label_image_url.includes("temp_thumbnail");
@@ -76,7 +79,7 @@ useEffect(() => {
         pollingRef.current = null;
       }
     };
-  }, [wine?.label_image_url, id]);
+  }, [wine?.label_image_url, wineId]);
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -125,8 +128,9 @@ useEffect(() => {
     };
 
     try {
-      await updateWine(id, payload);
-      const updated = await fetchWineById(id);
+      if (!wineId) throw new Error("Wine ID is not available");
+      await updateWine(wineId, payload);
+      const updated = await fetchWineById(wineId);
       setWine(updated);
       setEditForm(updated);
       setEditing(false);
@@ -150,7 +154,8 @@ const handleLabelImageChange = async (e: any) => {
     formData.append("label_image", jpegBlob, "label.jpg");
 
     // --- PATCH送信 ---
-    const response = await fetch(`https://cellar-app.local/api/wines/${id}`, {
+    if (!wineId) throw new Error("Wine ID is not available");
+    const response = await fetch(`https://cellar-app.local/api/wines/${wineId}`, {
       method: "PATCH",
       body: formData,
     });
@@ -158,7 +163,7 @@ const handleLabelImageChange = async (e: any) => {
     if (!response.ok) throw new Error("画像アップロードに失敗しました");
 
     // ダミーURLが返るため一度再取得
-    const updated = await fetchWineById(id);
+    const updated = await fetchWineById(wineId);
     setWine(updated);
   } catch (err) {
     console.error(err);

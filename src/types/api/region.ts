@@ -20,7 +20,7 @@ export interface Region {
  */
 export interface CreateRegionRequest {
   name: string;
-  country_id: number;
+  country_id: number | null;
   parent_id?: number | null;
 }
 
