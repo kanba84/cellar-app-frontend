@@ -246,9 +246,6 @@ const CellarVisualizer = ({ bottles, onBottleSelect }: CellarVisualizerProps) =>
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <Typography variant="h6" sx={{ color: '#fff', mb: 2 }}>
-                  セラー外観表示
-                </Typography>
                 {grid.map((rowSlots, rowIdx) => (
                   <motion.div
                     key={rowIdx}
