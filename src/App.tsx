@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import BottleListPage from "./features/bottles/pages/BottleListPage";
 import WineListPage from "./pages/WineListPage";
@@ -14,11 +15,33 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
+import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import MenuIcon from "@mui/icons-material/Menu";
 import AppellationListPage from "./pages/AppellationListPage";
 import DesignationTypeListPage from "./pages/DesignationTypeListPage";
 import WineTypeListPage from "./pages/WineTypeListPage";
 
+const menuItems = [
+  { label: "ボトル一覧", path: "/" },
+  { label: "ワイン一覧", path: "/wines" },
+  { label: "ダッシュボード", path: "/dashboard" },
+  { label: "設定", path: "/config" },
+];
+
 function App() {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Box>
       <AppBar position="static">
@@ -36,18 +59,56 @@ function App() {
           >
             Cellar App
           </Typography>
-          <Button color="inherit" component={Link} to="/">
-            ボトル一覧
-          </Button>
-          <Button color="inherit" component={Link} to="/wines">
-            ワイン一覧
-          </Button>
-          <Button color="inherit" component={Link} to="/dashboard">
-            ダッシュボード
-          </Button>
-          <Button color="inherit" component={Link} to="/config">
-            設定
-          </Button>
+          
+          {/* PC用ナビゲーションボタン */}
+          <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 2 }}>
+            {menuItems.map((item) => (
+              <Button
+                key={item.path}
+                color="inherit"
+                component={Link}
+                to={item.path}
+              >
+                {item.label}
+              </Button>
+            ))}
+          </Box>
+
+          {/* スマートフォン用ハンバーガーメニュー */}
+          <Box sx={{ display: { xs: "flex", sm: "none" } }}>
+            <IconButton
+              size="large"
+              edge="end"
+              color="inherit"
+              onClick={handleMenuOpen}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleMenuClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+            >
+              {menuItems.map((item) => (
+                <MenuItem
+                  key={item.path}
+                  component={Link}
+                  to={item.path}
+                  onClick={handleMenuClose}
+                >
+                  {item.label}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
         </Toolbar>
       </AppBar>
       <Container sx={{ mt: 4 }}>
