@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -6,6 +7,8 @@ import {
 } from "@mui/material";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import ViewModuleIcon from "@mui/icons-material/ViewModule";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddIcon from "@mui/icons-material/Add";
 
 import type {
   BottleListViewBottleProps,
@@ -15,13 +18,14 @@ import type {
 } from "@/types/hook/bottle";
 import BottleStats from "./BottleStats";
 import BottleFilter from "./BottleFilter";
-import BottleAddButtons from "./BottleAddButtons";
 import BottleList from "./BottleList";
 import CellarVisualizer from "./CellarVisualizer";
 import BottleDetailModal from "./BottleDetailModal";
 import { Modal } from "./Modal";
 import BottleCreateForm from "./BottleCreateForm";
 import WineWithBottleCreateForm from "@/components/Wine/WineWithBottleCreateForm";
+import FloatingActionButton from "./FloatingActionButton";
+import SpeedDialMenu from "./SpeedDialMenu";
 
 interface BottleListViewProps {
   bottleProps: BottleListViewBottleProps;
@@ -36,6 +40,8 @@ export default function BottleListView({
   modalProps,
   uiProps,
 }: BottleListViewProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   /* bottle系 */
   const {
     bottles,
@@ -145,13 +151,6 @@ export default function BottleListView({
         </ToggleButtonGroup>
       </Box>
 
-      {/* 追加ボタン */}
-      <BottleAddButtons
-        isMobile={isMobile}
-        onAddBottle={onAddBottle}
-        onAddWine={onAddWine}
-      />
-
       {/* モーダル群 */}
 
       {/* ワイン + ボトル作成モーダル */}
@@ -202,6 +201,36 @@ export default function BottleListView({
           onBottleSelect={setDetailBottle}
         />
       )}
+
+      {/* FABとメニュー */}
+      <FloatingActionButton
+        isOpen={menuOpen}
+        onToggle={() => setMenuOpen(!menuOpen)}
+        isModalOpen={showCreateBottleModal || showCreateWineModal}
+      />
+
+      <SpeedDialMenu
+        isOpen={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        items={[
+          {
+            label: "ワイン新規追加",
+            icon: <AddIcon />,
+            onClick: () => {
+              setMenuOpen(false);
+              onAddWine();
+            },
+          },
+          {
+            label: "ボトル追加",
+            icon: <AddCircleOutlineIcon />,
+            onClick: () => {
+              setMenuOpen(false);
+              onAddBottle();
+            },
+          },
+        ]}
+      />
     </Box>
   );
 }
