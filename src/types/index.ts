@@ -12,6 +12,7 @@ export * from './api/region';
 export * from './api/appellation';
 export * from './api/wineType';
 export * from './api/designationType';
+export * from './api/stats';
 
 // Domain Types
 export * from './domain/bottle';

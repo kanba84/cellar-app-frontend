@@ -5,6 +5,7 @@ import WineDetailPage from "./pages/WineDetailPage";
 import CountryListPage from "./pages/CountryListPage";
 import RegionListPage from "./pages/RegionListPage";
 import ConfigPage from "./pages/ConfigPage";
+import DashboardPage from "./pages/DashboardPage";
 
 // Material UIのインポート
 import AppBar from "@mui/material/AppBar";
@@ -41,6 +42,9 @@ function App() {
           <Button color="inherit" component={Link} to="/wines">
             ワイン一覧
           </Button>
+          <Button color="inherit" component={Link} to="/dashboard">
+            ダッシュボード
+          </Button>
           <Button color="inherit" component={Link} to="/config">
             設定
           </Button>
@@ -48,6 +52,7 @@ function App() {
       </AppBar>
       <Container sx={{ mt: 4 }}>
         <Routes>
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/" element={<BottleListPage />} />
           <Route path="/wines" element={<WineListPage />} />
           <Route path="/wines/:id" element={<WineDetailPage />} />
