@@ -1,6 +1,5 @@
 import { Box, Paper, IconButton, Backdrop, Typography } from "@mui/material";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import AddIcon from "@mui/icons-material/Add";
+// Removed unused AddCircleOutlineIcon and AddIcon imports
 
 interface MenuItem {
   label: string;

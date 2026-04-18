@@ -14,12 +14,13 @@ export default function FloatingActionButton({
   isModalOpen = false,
 }: FloatingActionButtonProps) {
   const [isVisible, setIsVisible] = useState(true);
-  const [isScrolling, setIsScrolling] = useState(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
+  // Remove unused isScrolling state
+  // const [isScrolling, setIsScrolling] = useState(false);
+  // Use number for setTimeout ref to avoid NodeJS namespace error
+  const scrollTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolling(true);
       setIsVisible(false);
 
       // 前のタイマーをクリア
@@ -28,8 +29,7 @@ export default function FloatingActionButton({
       }
 
       // debounce 150ms
-      scrollTimeoutRef.current = setTimeout(() => {
-        setIsScrolling(false);
+      scrollTimeoutRef.current = window.setTimeout(() => {
         setIsVisible(true);
       }, 150);
     };
