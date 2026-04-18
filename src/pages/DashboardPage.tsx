@@ -5,6 +5,8 @@ import {
   Cell,
   LineChart,
   Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -65,6 +67,31 @@ function DashboardPage() {
   if (!stats) {
     return <Alert severity="warning">統計情報が取得できません</Alert>;
   }
+
+  // ヴィンテージデータを最小値から最大値まで埋める
+  const getCompleteVintageData = () => {
+    if (!stats.vintages || stats.vintages.length === 0) {
+      return [];
+    }
+
+    const vintages = stats.vintages.map(v => v.vintage);
+    const minVintage = Math.min(...vintages);
+    const maxVintage = Math.max(...vintages);
+
+    // 最小値から最大値までのMapを作成
+    const vintageMap = new Map(stats.vintages.map(v => [v.vintage, v.count]));
+
+    // 完全なデータを生成
+    const completeData: Array<{ vintage: number; count: number }> = [];
+    for (let year = minVintage; year <= maxVintage; year++) {
+      completeData.push({
+        vintage: year,
+        count: vintageMap.get(year) ?? 0,
+      });
+    }
+
+    return completeData;
+  };
 
   return (
     <Box>
@@ -185,6 +212,39 @@ function DashboardPage() {
               />
             </LineChart>
           </ResponsiveContainer>
+        </Box>
+
+        {/* ヴィンテージ別の統計 */}
+        <Box
+          sx={{
+            p: 2,
+            border: "1px solid #ddd",
+            borderRadius: 2,
+            boxShadow: 1,
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            ヴィンテージ別のボトル数
+          </Typography>
+          {stats.vintages && stats.vintages.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={getCompleteVintageData()}
+                margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="vintage" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="count" fill="#82ca9d" name="ボトル数" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <Typography color="textSecondary">
+              ヴィンテージデータがありません
+            </Typography>
+          )}
         </Box>
       </Box>
     </Box>

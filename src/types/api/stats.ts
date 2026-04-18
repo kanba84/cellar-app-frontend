@@ -6,6 +6,7 @@ export interface StatsData {
   wineTypes: WineTypeStat[];
   countries: CountryStat[];
   inventoryTrend: InventoryTrendPoint[];
+  vintages: VintageData[];
 }
 
 export interface WineTypeStat {
@@ -20,5 +21,10 @@ export interface CountryStat {
 
 export interface InventoryTrendPoint {
   date: string;
+  count: number;
+}
+
+export interface VintageData {
+  vintage: number;
   count: number;
 }
