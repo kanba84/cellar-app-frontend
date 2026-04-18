@@ -119,7 +119,7 @@ function DashboardPage() {
             ワイン種別の構成比
           </Typography>
           <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
+            <PieChart style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif' }}>
               <Pie
                 data={stats.wineTypes}
                 cx="50%"
@@ -157,7 +157,7 @@ function DashboardPage() {
             生産国の構成比
           </Typography>
           <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
+            <PieChart style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif' }}>
               <Pie
                 data={stats.countries}
                 cx="50%"
@@ -195,10 +195,11 @@ function DashboardPage() {
             ボトル数の推移
           </Typography>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart
-              data={stats.inventoryTrend}
-              margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
-            >
+              <LineChart
+                data={stats.inventoryTrend}
+                margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif' }}
+              >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
@@ -229,9 +230,10 @@ function DashboardPage() {
           {stats.vintages && stats.vintages.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
-                data={getCompleteVintageData()}
-                margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
-              >
+                  data={getCompleteVintageData()}
+                  margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                  style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif' }}
+                >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="vintage" />
                 <YAxis />
