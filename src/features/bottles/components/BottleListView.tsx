@@ -100,7 +100,12 @@ export default function BottleListView({
   return (
     <Box px={isMobile ? 0.5 : 2}>
       {/* ヘッダー */}
-      <Typography variant="h4" gutterBottom fontSize={isMobile ? 22 : 32}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        fontSize={isMobile ? 22 : 32}
+        sx={{ color: "#2C2C2C", fontWeight: 700, mb: 3 }}
+      >
         ボトル一覧
       </Typography>
 
@@ -126,10 +131,14 @@ export default function BottleListView({
           flexWrap: "wrap",
           alignItems: "center",
           gap: 1.5,
-          my: 1.5,
+          my: 2,
+          p: 2,
+          bgcolor: "#2a2a2a",
+          borderRadius: 0,
+          border: "1px solid #424242",
         }}
       >
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{ color: "#ffffff", fontWeight: 600 }}>
           表示
         </Typography>
 
@@ -138,6 +147,23 @@ export default function BottleListView({
           exclusive
           onChange={onViewModeChange}
           size={isMobile ? "small" : "medium"}
+          sx={{
+            "& .MuiToggleButton-root": {
+              color: "#b0bec5",
+              borderColor: "#616161",
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.08)",
+              },
+            },
+            "& .MuiToggleButton-root.Mui-selected": {
+              color: "#ffffff",
+              backgroundColor: "#424242",
+              borderColor: "#757575",
+              "&:hover": {
+                backgroundColor: "#4a4a4a",
+              },
+            },
+          }}
         >
           <ToggleButton value="list">
             <ViewListIcon sx={{ mr: 0.5, fontSize: 20 }} />

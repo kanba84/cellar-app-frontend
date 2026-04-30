@@ -78,38 +78,79 @@ function WineListPage() {
             : "条件に合うワインはありません。"}
         </Typography>
       ) : (
-        <List>
-          {filteredWines.map((wine) => {
-            const nameColor = wineTypeColor[wine.wine_type_name] || "inherit";
-
-            return (
-              <ListItem key={wine.id} disablePadding>
-                <ListItemButton component={Link} to={`/wines/${wine.id}`}>
-                  <Box display="flex" alignItems="center" gap={1} width="100%">
-                    {wine.country_iso_code && (
+        <Box
+          component="div"
+          sx={{
+            bgcolor: "#FDFCF0",
+            borderRadius: 0,
+            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.12)",
+            overflow: "hidden",
+          }}
+        >
+          <List sx={{ p: 0 }}>
+            {filteredWines.map((wine) => {
+              return (
+                <ListItem
+                  key={wine.id}
+                  disablePadding
+                  sx={{
+                    background: "#FDFCF0",
+                    borderRadius: 0,
+                    mb: 0,
+                    mx: 0,
+                    px: isMobile ? 1 : 2,
+                    py: isMobile ? 1 : 1.5,
+                    borderBottom: "1px solid #E0DCCF",
+                    "&:first-of-type": {
+                      borderTop: "1px solid #E0DCCF",
+                    },
+                    "&:hover": {
+                      background: "#FAF8ED",
+                    },
+                  }}
+                >
+                  <ListItemButton component={Link} to={`/wines/${wine.id}`} sx={{ p: 0 }}>
+                    <Box display="flex" alignItems="flex-start" gap={1.5} width="100%">
+                      {/* カラーバー */}
                       <Box
                         sx={{
-                          display: "flex",
-                          alignItems: "center",
+                          width: "4px",
+                          height: "1.5em",
+                          backgroundColor:
+                            wineTypeColor[wine.wine_type_name as keyof typeof wineTypeColor] || "#cccccc",
                           flexShrink: 0,
+                          borderRadius: "1px",
                         }}
-                      >
-                        <span
-                          className={`fi fi-${wine.country_iso_code.toLowerCase()}`}
-                          style={{ fontSize: "24px", borderRadius: "4px" }}
-                        />
-                      </Box>
-                    )}
-                    <Typography sx={{ color: nameColor }}>
-                      {wine.name}
-                      {wine.vintage && ` (${wine.vintage})`}
-                    </Typography>
-                  </Box>
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
-        </List>
+                      />
+
+                      {/* 国旗 */}
+                      {wine.country_iso_code && (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <span
+                            className={`fi fi-${wine.country_iso_code.toLowerCase()}`}
+                            style={{ fontSize: "24px", borderRadius: "4px" }}
+                          />
+                        </Box>
+                      )}
+
+                      {/* ワイン名 + ヴィンテージ */}
+                      <Typography sx={{ fontWeight: 600, color: "#2C2C2C", flex: 1 }}>
+                        {wine.name}
+                        {wine.vintage && ` (${wine.vintage})`}
+                      </Typography>
+                    </Box>
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </List>
+        </Box>
       )}
     </Box>
   );

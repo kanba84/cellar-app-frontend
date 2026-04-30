@@ -5,8 +5,9 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Switch from "@mui/material/Switch";
-import wineTypeColor from "@/utils/wineUtils";
+import Chip from "@mui/material/Chip";
 import { useNavigate } from "react-router-dom";
+import wineTypeColor, { wineTypeColorLight } from "@/utils/wineUtils";
 import "flag-icons/css/flag-icons.min.css";
 import MenuItem from "@mui/material/MenuItem";
 import type { Bottle } from "@/types/api/bottle";
@@ -34,9 +35,6 @@ function BottleItem({
   onDelete,
   onBottleDetail,
 }: BottleItemProps) {
-  const wineTypeName = bottle.wine?.wine_type_name;
-  const nameColor = wineTypeName ? wineTypeColor[wineTypeName as keyof typeof wineTypeColor] : "inherit";
-  const itemBgColor = bottle.is_opened ? "#e0e0e0" : "#fafafa";
   const navigate = useNavigate();
 
   const handleOpenedToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,12 +51,16 @@ function BottleItem({
     <ListItem
       alignItems="flex-start"
       sx={{
-        mb: 2,
-        bgcolor: itemBgColor,
-        borderRadius: 2,
-        boxShadow: 1,
+        mb: 0,
+        bgcolor: "#FDFCF0",
+        borderRadius: 0,
+        boxShadow: "none",
+        borderBottom: "1px solid #E0DCCF",
         flexDirection: "column", // 縦並びに
         p: 2,
+        "&:first-of-type": {
+          borderTop: "1px solid #E0DCCF",
+        },
       }}
     >
       {/* --- 1段目：画像とワイン情報 --- */}
@@ -76,33 +78,82 @@ function BottleItem({
           sx={{
             width: 100,
             height: "auto",
-            borderRadius: 2,
-            boxShadow: 1,
+            borderRadius: 0,
+            boxShadow: "none",
+            border: "1px solid #E0DCCF",
             flexShrink: 0,
             cursor: onBottleDetail ? "pointer" : "default",
           }}
         />
 
         <Box flex={1}>
-          <Typography
-            fontWeight="bold"
-            sx={{ color: nameColor, cursor: "pointer" }}
-            onClick={() => {
-              if (bottle.wine?.id) navigate(`/wines/${bottle.wine.id}`);
+          {/* ワイン名 + カラーバー */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 1.5,
+              mb: 1,
             }}
           >
-            {bottle.wine?.name || "ワイン名不明"}
-            {bottle.wine?.vintage && <>（{bottle.wine.vintage}年）</>}
-          </Typography>
+            {/* ワインタイプカラーバー */}
+            <Box
+              sx={{
+                width: "4px",
+                height: "1.5em",
+                backgroundColor:
+                  wineTypeColor[bottle.wine?.wine_type_name as keyof typeof wineTypeColor] || "#cccccc",
+                flexShrink: 0,
+                borderRadius: "1px",
+              }}
+            />
 
-          <Typography variant="body2" color="text.secondary">
-            タイプ: {bottle.wine?.wine_type_name || "-"} / 生産国:{" "}
-            {bottle.wine?.country_name || "-"}
-            {bottle.wine?.region_name && (
-              <> / 地域: {bottle.wine.region_name}</>
+            <Typography
+              fontWeight="bold"
+              sx={{ color: "#2C2C2C", cursor: "pointer", flex: 1 }}
+              onClick={() => {
+                if (bottle.wine?.id) navigate(`/wines/${bottle.wine.id}`);
+              }}
+            >
+              {bottle.wine?.name || "ワイン名不明"}
+              {bottle.wine?.vintage && <>（{bottle.wine.vintage}年）</>}
+            </Typography>
+          </Box>
+
+          {/* ワイン詳細情報 */}
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1, flexWrap: "wrap" }}>
+            {/* ワインタイプChip */}
+            {bottle.wine?.wine_type_name && (
+              <Chip
+                label={bottle.wine.wine_type_name}
+                size="small"
+                sx={{
+                  backgroundColor:
+                    wineTypeColorLight[bottle.wine.wine_type_name as keyof typeof wineTypeColorLight] || "#f0f0f0",
+                  color: wineTypeColor[bottle.wine.wine_type_name as keyof typeof wineTypeColor] || "#666",
+                  fontWeight: 600,
+                  height: "24px",
+                }}
+              />
             )}
-            <br />
-            生産者: {bottle.wine?.producer || "-"}
+
+            {/* 生産国 */}
+            {bottle.wine?.country_name && (
+              <Typography variant="body2" sx={{ color: "#665E5E" }}>
+                {bottle.wine.country_name}
+              </Typography>
+            )}
+          </Stack>
+
+          {/* その他の情報 */}
+          <Typography variant="body2" sx={{ color: "#665E5E", lineHeight: 1.4 }}>
+            {bottle.wine?.region_name && (
+              <>地域: {bottle.wine.region_name}</>
+            )}
+            {bottle.wine?.region_name && bottle.wine?.producer && <> / </>}
+            {bottle.wine?.producer && (
+              <>生産者: {bottle.wine.producer}</>
+            )}
           </Typography>
         </Box>
       </Stack>
@@ -153,7 +204,7 @@ function BottleItem({
             </TextField>
           </Stack>
         ) : (
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ color: "#2C2C2C" }}>
             棚位置: {bottle.row_number}行 {bottle.column_number}列
           </Typography>
         )}
@@ -167,7 +218,7 @@ function BottleItem({
             onChange={handleOpenedToggle}
             color="primary"
           />
-          <Typography variant="body2">
+          <Typography variant="body2" sx={{ color: "#2C2C2C" }}>
             開封:{" "}
             {(editId === bottle.id ? editForm.is_opened : bottle.is_opened)
               ? "済"

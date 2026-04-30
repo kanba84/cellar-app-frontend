@@ -44,28 +44,40 @@ function BottleList({
   }
 
   return (
-    <List>
-      {sortedRows.map((row, index) => {
-        const bottlesInRow = rowGroups[row];
-        const groupColor = index % 2 === 0 ? "#f5f5f5" : "#fff";
-        return (
+    <Box
+      component="div"
+      sx={{
+        bgcolor: "#FDFCF0",
+        borderRadius: 0,
+        boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.12)",
+        overflow: "hidden",
+      }}
+    >
+      <List sx={{ p: 0 }}>
+        {sortedRows.map((row) => {
+          const bottlesInRow = rowGroups[row];
+          return (
           <div key={row}>
-            <Divider sx={{ my: 1 }} />
+            <Divider sx={{ my: 0, borderColor: "#E0DCCF", borderBottomWidth: "1px" }} />
             {/* 行ヘッダー */}
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                px: 1,
-                py: 0.5,
-                background: groupColor,
-                borderRadius: 1,
+                px: 2,
+                py: 1,
+                background: "#FDFCF0",
+                borderRadius: 0,
                 cursor: "pointer",
+                borderBottom: "1px solid #E0DCCF",
+                "&:hover": {
+                  bgcolor: "#FAF8ED",
+                },
               }}
               onClick={() => toggleRow(row)}
             >
-              <Typography variant="subtitle1">
+              <Typography variant="subtitle1" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
                 {row}段目 ({bottlesInRow.length}本）
               </Typography>
               <IconButton size="small">
@@ -83,16 +95,20 @@ function BottleList({
                   <Box
                     key={bottle.id}
                     sx={{
-                      background: groupColor,
-                      borderRadius: 2,
-                      mb: 1,
-                      mx: 1,
-                      px: isMobile ? 0.5 : 1,
-                      py: isMobile ? 0.5 : 1,
+                      background: "#FDFCF0",
+                      borderRadius: 0,
+                      mb: 0,
+                      mx: 0,
+                      px: isMobile ? 1 : 2,
+                      py: isMobile ? 1 : 1.5,
                       cursor: "pointer",
                       transition: "background 0.2s",
+                      borderBottom: "1px solid #E0DCCF",
                       "&:hover": {
-                        background: "#e0e0e0",
+                        background: "#FAF8ED",
+                      },
+                      "&:last-child": {
+                        borderBottom: "1px solid #E0DCCF",
                       },
                     }}
                   >
@@ -112,8 +128,9 @@ function BottleList({
             </Collapse>
           </div>
         );
-      })}
-    </List>
+        })}
+      </List>
+    </Box>
   );
 }
 
