@@ -79,7 +79,9 @@ export default function SpeedDialMenu({
                 borderRadius: 1,
               }}
             >
-              <Typography variant="body2">{item.label}</Typography>
+              <Typography variant="body2" sx={{ color: "#2c2c2c", fontWeight: 600 }}>
+                {item.label}
+              </Typography>
             </Paper>
 
             {/* メニューアイコンボタン */}

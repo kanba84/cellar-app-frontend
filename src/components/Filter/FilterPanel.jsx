@@ -25,12 +25,37 @@ function FilterPanel({
   filterFields = [],
   onReset,
   isMobile = false,
+  isDarkMode = false,
 }) {
   const handleFieldChange = (fieldName, value) => {
     if (onChange) {
       onChange(fieldName, value);
     }
   };
+
+  const textFieldStyles = isDarkMode
+    ? {
+        "& .MuiOutlinedInput-root": {
+          color: "#ffffff",
+          "& fieldset": {
+            borderColor: "#424242",
+          },
+          "&:hover fieldset": {
+            borderColor: "#616161",
+          },
+        },
+        "& .MuiInputBase-input::placeholder": {
+          color: "#b0bec5",
+          opacity: 1,
+        },
+        "& .MuiInputLabel-root": {
+          color: "#b0bec5",
+        },
+        "& .MuiInputLabel-root.Mui-focused": {
+          color: "#ffffff",
+        },
+      }
+    : {};
 
   return (
     <Stack spacing={1} sx={{ mb: 2 }}>
@@ -62,6 +87,7 @@ function FilterPanel({
                   minWidth: 120,
                   mb: 0,
                   ...sx,
+                  ...textFieldStyles,
                 }}
               >
                 {options.map((option) => (
@@ -85,6 +111,7 @@ function FilterPanel({
                   minWidth: 80,
                   mb: 0,
                   ...sx,
+                  ...textFieldStyles,
                 }}
               />
             );
@@ -102,6 +129,7 @@ function FilterPanel({
                   minWidth: 120,
                   mb: 0,
                   ...sx,
+                  ...textFieldStyles,
                 }}
               />
             );
@@ -112,10 +140,17 @@ function FilterPanel({
       {onReset && (
         <Button
           variant="outlined"
-          color="inherit"
           fullWidth
           onClick={onReset}
-          sx={{ mt: 1 }}
+          sx={{
+            mt: 1,
+            color: isDarkMode ? "#ffffff" : "inherit",
+            borderColor: isDarkMode ? "#616161" : "#e0e0e0",
+            "&:hover": {
+              borderColor: isDarkMode ? "#757575" : "#bdbdbd",
+              backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.08)" : "transparent",
+            },
+          }}
         >
           フィルター解除
         </Button>

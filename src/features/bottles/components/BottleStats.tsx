@@ -13,11 +13,21 @@ function BottleStats({ bottles }: BottleStatsProps) {
   }, {});
 
   return (
-    <Box sx={{ mb: 2 }}>
-      <Typography variant="body1">総本数: {bottles.length}本</Typography>
+    <Box
+      sx={{
+        mb: 2,
+        p: 2,
+        bgcolor: "#2a2a2a",
+        borderRadius: 0,
+        border: "1px solid #424242",
+      }}
+    >
+      <Typography variant="body1" sx={{ color: "#ffffff", fontWeight: 600 }}>
+        総本数: {bottles.length}本
+      </Typography>
       <Stack direction="row" spacing={2} flexWrap="wrap" sx={{ mt: 1 }}>
         {Object.entries(typeCounts).map(([type, count]) => (
-          <Typography key={type} variant="body2">
+          <Typography key={type} variant="body2" sx={{ color: "#e0e0e0" }}>
             {type}: {count}本
           </Typography>
         ))}

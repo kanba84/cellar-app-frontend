@@ -2,15 +2,21 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
-import { initAxiosClient } from './api/axiosClient'; // ← 追加
+import { initAxiosClient } from './api/axiosClient';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import theme from './theme';
 
 async function bootstrap() {
-  await initAxiosClient(); // ← ここで待つ
+  await initAxiosClient();
+
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ThemeProvider>
     </React.StrictMode>
   );
 }

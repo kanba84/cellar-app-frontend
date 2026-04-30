@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import type { Bottle } from "@/types/api/bottle";
 import FilterPanel from "@/components/Filter/FilterPanel";
 
@@ -98,13 +99,24 @@ function BottleFilter({
   ];
 
   return (
-    <TypedFilterPanel
-      filters={filters}
-      onChange={handleFilterChange}
-      filterFields={filterFields}
-      onReset={resetFilters}
-      isMobile={isMobile}
-    /> as any
+    <Box
+      sx={{
+        mb: 2,
+        p: 2,
+        bgcolor: "#2a2a2a",
+        borderRadius: 0,
+        border: "1px solid #424242",
+      }}
+    >
+      <TypedFilterPanel
+        filters={filters}
+        onChange={handleFilterChange}
+        filterFields={filterFields}
+        onReset={resetFilters}
+        isMobile={isMobile}
+        isDarkMode={true}
+      />
+    </Box>
   );
 }
 
