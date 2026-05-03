@@ -47,6 +47,21 @@ function BottleItem({
     }
   };
 
+  const editFieldSx = {
+    width: 80,
+    "& .MuiOutlinedInput-input": {
+      color: "#2C2C2C",
+      fontWeight: 500,
+    },
+    "& .MuiInputLabel-root": {
+      color: "#665E5E",
+    },
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#C8C1B5",
+    },
+  };
+
+
   return (
     <ListItem
       alignItems="flex-start"
@@ -55,12 +70,12 @@ function BottleItem({
         bgcolor: "#FDFCF0",
         borderRadius: 0,
         boxShadow: "none",
-        borderBottom: "1px solid #E0DCCF",
+        //borderBottom: "1px solid #E0DCCF",
         flexDirection: "column", // 縦並びに
         p: 2,
-        "&:first-of-type": {
-          borderTop: "1px solid #E0DCCF",
-        },
+        //"&:first-of-type": {
+        //  borderTop: "1px solid #E0DCCF",
+        //},
       }}
     >
       {/* --- 1段目：画像とワイン情報 --- */}
@@ -178,7 +193,7 @@ function BottleItem({
               onChange={(e) =>
                 onEditChange({ ...editForm, row_number: e.target.value ? Number(e.target.value) : undefined })
               }
-              sx={{ width: 80 }}
+              sx={editFieldSx}
             >
               {[...Array(9)].map((_, i) => (
                 <MenuItem key={i + 1} value={String(i + 1)}>
@@ -194,7 +209,7 @@ function BottleItem({
               onChange={(e) =>
                 onEditChange({ ...editForm, column_number: e.target.value ? Number(e.target.value) : undefined })
               }
-              sx={{ width: 80 }}
+              sx={editFieldSx}
             >
               {[...Array(7)].map((_, i) => (
                 <MenuItem key={i + 1} value={String(i + 1)}>
@@ -217,6 +232,15 @@ function BottleItem({
             }
             onChange={handleOpenedToggle}
             color="primary"
+            sx={{
+              "& .MuiSwitch-switchBase": {
+                color: "#B8B0A0",
+              },
+              "& .MuiSwitch-track": {
+                backgroundColor: "#D6D0C4",
+                opacity: 1,
+              },
+            }}
           />
           <Typography variant="body2" sx={{ color: "#2C2C2C" }}>
             開封:{" "}
@@ -263,8 +287,15 @@ function BottleItem({
               </Button>
               <Button
                 variant="outlined"
-                color="inherit"
                 size="small"
+                sx={{
+                  color: "#665E5E",
+                  borderColor: "#B8B0A0",
+                  "&:hover": {
+                    borderColor: "#8A8175",
+                    backgroundColor: "#F5F1E8",
+                  },
+                }}
                 onClick={(e: React.MouseEvent) => {
                   e.stopPropagation();
                   onEditCancel();
