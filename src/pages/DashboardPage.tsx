@@ -39,6 +39,19 @@ function DashboardPage() {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const titleColor = "#111827";
+  const chartTextColor = "#111827";
+  const chartGridColor = "#e5e7eb";
+  const chartBorderColor = "#e5e7eb";
+
+  const chartCardSx = {
+    p: 2,
+    border: `1px solid ${chartBorderColor}`,
+    borderRadius: 2,
+    boxShadow: 1,
+    bgcolor: "#fff",
+    color: chartTextColor,
+  } as const;
 
   useEffect(() => {
     fetchStats()
@@ -107,15 +120,8 @@ function DashboardPage() {
         }}
       >
         {/* ワイン種別ごとの構成比 */}
-        <Box
-          sx={{
-            p: 2,
-            border: "1px solid #ddd",
-            borderRadius: 2,
-            boxShadow: 1,
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
+        <Box sx={chartCardSx}>
+          <Typography variant="h6" gutterBottom sx={{ color: titleColor }}>
             ワイン種別の構成比
           </Typography>
           <ResponsiveContainer width="100%" height={300}>
@@ -125,9 +131,18 @@ function DashboardPage() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent = 0 }) =>
-                  `${name} ${(percent * 100).toFixed(0)}%`
-                }
+                startAngle={90}
+                endAngle={-270}
+                label={({ cx, cy, midAngle = 0, innerRadius, outerRadius, percent = 0, name, fill }) => {
+                  const radius = (innerRadius ?? 0) + ((outerRadius ?? 0) - (innerRadius ?? 0)) * 1.2;
+                  const x = (cx ?? 0) + radius * Math.cos((-midAngle * Math.PI) / 180);
+                  const y = (cy ?? 0) + radius * Math.sin((-midAngle * Math.PI) / 180);
+                  return (
+                    <text x={x} y={y} fill={fill ?? "currentColor"} textAnchor={x > (cx ?? 0) ? "start" : "end"} dominantBaseline="central">
+                      {`${name} ${(percent * 100).toFixed(0)}%`}
+                    </text>
+                  );
+                }}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="count"
@@ -145,15 +160,8 @@ function DashboardPage() {
         </Box>
 
         {/* 生産国の構成比 */}
-        <Box
-          sx={{
-            p: 2,
-            border: "1px solid #ddd",
-            borderRadius: 2,
-            boxShadow: 1,
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
+        <Box sx={chartCardSx}>
+          <Typography variant="h6" gutterBottom sx={{ color: titleColor }}>
             生産国の構成比
           </Typography>
           <ResponsiveContainer width="100%" height={300}>
@@ -163,9 +171,18 @@ function DashboardPage() {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent = 0 }) =>
-                  `${name} ${(percent * 100).toFixed(0)}%`
-                }
+                startAngle={90}
+                endAngle={-270}
+                label={({ cx, cy, midAngle = 0, innerRadius, outerRadius, percent = 0, name, fill }) => {
+                  const radius = (innerRadius ?? 0) + ((outerRadius ?? 0) - (innerRadius ?? 0)) * 1.2;
+                  const x = (cx ?? 0) + radius * Math.cos((-midAngle * Math.PI) / 180);
+                  const y = (cy ?? 0) + radius * Math.sin((-midAngle * Math.PI) / 180);
+                  return (
+                    <text x={x} y={y} fill={fill ?? "currentColor"} textAnchor={x > (cx ?? 0) ? "start" : "end"} dominantBaseline="central">
+                      {`${name} ${(percent * 100).toFixed(0)}%`}
+                    </text>
+                  );
+                }}
                 outerRadius={80}
                 fill="#82ca9d"
                 dataKey="count"
@@ -183,15 +200,8 @@ function DashboardPage() {
         </Box>
 
         {/* ボトル数の推移 */}
-        <Box
-          sx={{
-            p: 2,
-            border: "1px solid #ddd",
-            borderRadius: 2,
-            boxShadow: 1,
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
+        <Box sx={chartCardSx}>
+          <Typography variant="h6" gutterBottom sx={{ color: titleColor }}>
             ボトル数の推移
           </Typography>
           <ResponsiveContainer width="100%" height={300}>
@@ -200,11 +210,11 @@ function DashboardPage() {
                 margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
                 style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif' }}
               >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
+              <CartesianGrid stroke={chartGridColor} strokeDasharray="3 3" />
+              <XAxis dataKey="date" tick={{ fill: chartTextColor }} axisLine={{ stroke: chartGridColor }} tickLine={{ stroke: chartGridColor }} />
+              <YAxis tick={{ fill: chartTextColor }} axisLine={{ stroke: chartGridColor }} tickLine={{ stroke: chartGridColor }} />
               <Tooltip />
-              <Legend />
+              <Legend wrapperStyle={{ color: chartTextColor }} />
               <Line
                 type="monotone"
                 dataKey="count"
@@ -216,15 +226,8 @@ function DashboardPage() {
         </Box>
 
         {/* ヴィンテージ別の統計 */}
-        <Box
-          sx={{
-            p: 2,
-            border: "1px solid #ddd",
-            borderRadius: 2,
-            boxShadow: 1,
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
+        <Box sx={chartCardSx}>
+          <Typography variant="h6" gutterBottom sx={{ color: titleColor }}>
             ヴィンテージ別のボトル数
           </Typography>
           {stats.vintages && stats.vintages.length > 0 ? (
@@ -234,11 +237,11 @@ function DashboardPage() {
                   margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
                   style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif' }}
                 >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="vintage" />
-                <YAxis />
+                <CartesianGrid stroke={chartGridColor} strokeDasharray="3 3" />
+                <XAxis dataKey="vintage" tick={{ fill: chartTextColor }} axisLine={{ stroke: chartGridColor }} tickLine={{ stroke: chartGridColor }} />
+                <YAxis tick={{ fill: chartTextColor }} axisLine={{ stroke: chartGridColor }} tickLine={{ stroke: chartGridColor }} />
                 <Tooltip />
-                <Legend />
+                <Legend wrapperStyle={{ color: chartTextColor }} />
                 <Bar dataKey="count" fill="#82ca9d" name="ボトル数" />
               </BarChart>
             </ResponsiveContainer>
