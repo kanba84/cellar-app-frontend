@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
@@ -27,6 +28,8 @@ function BottleCreateForm({
   showSubmitButton = true,
 }: BottleCreateFormProps) {
   const inputFontSize = { xs: 13, sm: 16 };
+  const selectedWine =
+    wines.find((wine) => String(wine.id) === form.wine_id) ?? null;
 
   return (
     <Box
@@ -40,29 +43,70 @@ function BottleCreateForm({
       <Stack spacing={2}>
         {/* ワイン選択欄（必要な場合のみ） */}
         {!hideWineSelect && (
-          <TextField
-            select
-            label="ワイン"
-            value={form.wine_id}
-            onChange={(e) => onChange({ ...form, wine_id: e.target.value })}
-            required
-            size="small"
-            InputProps={{ sx: { fontSize: inputFontSize } }}
-            InputLabelProps={{ sx: { fontSize: inputFontSize } }}
-          >
-            <MenuItem value="" sx={{ fontSize: inputFontSize }}>
-              選択してください
-            </MenuItem>
-            {wines.map((wine) => (
-              <MenuItem
-                key={wine.id}
-                value={wine.id}
-                sx={{ fontSize: inputFontSize }}
+          <Autocomplete<Wine, false, false, false>
+            options={wines}
+            value={selectedWine}
+            onChange={(_, value) =>
+              onChange({
+                ...form,
+                wine_id: value ? String(value.id) : "",
+              })
+            }
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            getOptionLabel={(option) =>
+              `${option.name}${option.vintage ? ` (${option.vintage})` : ""}`
+            }
+            filterOptions={(options, state) => {
+              const query = state.inputValue.trim().toLowerCase();
+              if (!query) return options;
+              return options.filter((wine) => {
+                const name = wine.name?.toLowerCase() ?? "";
+                const vintage = wine.vintage ? String(wine.vintage) : "";
+                return (
+                  name.includes(query) || vintage.toLowerCase().includes(query)
+                );
+              });
+            }}
+            renderOption={(props, option) => (
+              <Box
+                component="li"
+                {...props}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  py: 1,
+                }}
               >
-                {wine.name} {wine.vintage && `- ${wine.vintage}`}
-              </MenuItem>
-            ))}
-          </TextField>
+                <Typography sx={{ fontSize: inputFontSize }}>
+                  {option.name}
+                </Typography>
+                {option.vintage && (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ fontSize: inputFontSize }}
+                  >
+                    {option.vintage}
+                  </Typography>
+                )}
+              </Box>
+            )}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="ワイン"
+                placeholder="ワイン名・ヴィンテージで検索"
+                required
+                size="small"
+                InputProps={{
+                  ...params.InputProps,
+                  sx: { fontSize: inputFontSize },
+                }}
+                InputLabelProps={{ sx: { fontSize: inputFontSize } }}
+              />
+            )}
+          />
         )}
         <TextField
           select
