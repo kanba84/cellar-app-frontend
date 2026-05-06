@@ -24,6 +24,9 @@ export interface Wine {
   designation_type_id: number | null;
   designation_type_name: string | null;
   label_image_url: string | null;
+
+  has_stock: boolean;
+  stock_count: number;
 }
 
 /**

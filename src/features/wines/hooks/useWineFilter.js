@@ -5,6 +5,7 @@ const initialFilters = {
   country: "",
   region: "",
   name: "",
+  stock: "",
 };
 
 const filterReducer = (state, action) => {
@@ -17,6 +18,8 @@ const filterReducer = (state, action) => {
       return { ...state, region: action.payload };
     case "SET_NAME":
       return { ...state, name: action.payload };
+    case "SET_STOCK":
+      return { ...state, stock: action.payload };
     case "RESET":
       return initialFilters;
     default:
@@ -38,6 +41,8 @@ export function useWineFilter(wines = []) {
       if (filters.name) {
         ok = ok && wine.name.toLowerCase().includes(filters.name.toLowerCase());
       }
+      if (filters.stock === "in") ok = ok && wine.has_stock === true;
+      if (filters.stock === "out") ok = ok && wine.has_stock === false;
       return ok;
     });
   }, [wines, filters]);
@@ -50,6 +55,8 @@ export function useWineFilter(wines = []) {
     dispatch({ type: "SET_REGION", payload: value });
   const setFilterName = (value) =>
     dispatch({ type: "SET_NAME", payload: value });
+  const setFilterStock = (value) =>
+    dispatch({ type: "SET_STOCK", payload: value });
   const resetFilters = () => dispatch({ type: "RESET" });
 
   return {
@@ -58,6 +65,7 @@ export function useWineFilter(wines = []) {
     setFilterCountry,
     setFilterRegion,
     setFilterName,
+    setFilterStock,
     filteredWines,
     resetFilters,
   };
