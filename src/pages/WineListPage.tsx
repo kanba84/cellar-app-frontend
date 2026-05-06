@@ -29,6 +29,7 @@ function WineListPage() {
     setFilterCountry,
     setFilterRegion,
     setFilterName,
+    setFilterStock,
     filteredWines: filteredWinesRaw,
     resetFilters,
   } = useWineFilter(wines);
@@ -66,6 +67,7 @@ function WineListPage() {
         setFilterCountry,
         setFilterRegion,
         setFilterName,
+        setFilterStock,
         resetFilters,
         wines,
         isMobile,

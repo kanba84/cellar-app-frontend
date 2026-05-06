@@ -354,6 +354,7 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
                     <Typography sx={{ color: "#2C2C2C" }}>—</Typography>
                   )}
                 </Box>
+
                 <Typography sx={{ mb: 1, color: "#665E5E" }}>
                   生産国:{" "}
                   <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
@@ -377,12 +378,35 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
                   {wine.appellation_name ?? "—"}
                 </Box>
               </Typography>
-              <Typography sx={{ mb: 2, color: "#665E5E" }}>
+              <Typography sx={{ mb: 1, color: "#665E5E" }}>
                 生産者:{" "}
                 <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
                   {wine.producer ?? "—"}
                 </Box>
               </Typography>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                <Typography sx={{ color: "#665E5E" }}>在庫</Typography>
+                {typeof wine.has_stock !== "boolean" || typeof wine.stock_count !== "number" ? (
+                  <Chip
+                    label="在庫情報取得中"
+                    size="small"
+                    sx={{ bgcolor: "#EFE7DA", color: "#2C2C2C", fontWeight: 600 }}
+                  />
+                ) : wine.has_stock ? (
+                  <Chip
+                    label={`在庫 ${wine.stock_count}本`}
+                    size="small"
+                    sx={{ bgcolor: "#EFE7DA", color: "#2C2C2C", fontWeight: 600 }}
+                  />
+                ) : (
+                  <Chip
+                    label="在庫なし"
+                    size="small"
+                    sx={{ bgcolor: "#EFE7DA", color: "#2C2C2C", fontWeight: 600 }}
+                  />
+                )}
+              </Box>
             </Box>
 
             <Button variant="contained" onClick={() => setEditing(true)}>

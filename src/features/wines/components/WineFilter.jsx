@@ -6,6 +6,7 @@ function WineFilter({
   setFilterCountry,
   setFilterRegion,
   setFilterName,
+  setFilterStock,
   resetFilters,
   wines = [],
   isMobile,
@@ -24,6 +25,9 @@ function WineFilter({
         break;
       case "name":
         setFilterName(value);
+        break;
+      case "stock":
+        setFilterStock(value);
         break;
       default:
         break;
@@ -78,6 +82,17 @@ function WineFilter({
           label: name,
           value: name,
         })),
+      ],
+      sx: { minWidth: 120 },
+    },
+    {
+      name: "stock",
+      label: "在庫",
+      type: "select",
+      options: [
+        { label: "すべて", value: "" },
+        { label: "在庫あり", value: "in" },
+        { label: "在庫なし", value: "out" },
       ],
       sx: { minWidth: 120 },
     },
