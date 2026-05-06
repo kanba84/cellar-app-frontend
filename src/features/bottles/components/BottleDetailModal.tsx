@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import wineTypeColor from "@/utils/wineUtils";
+import wineTypeColor, { wineTypeColorLight } from "@/utils/wineUtils";
 import type { Bottle } from "@/types/api/bottle";
 import type { Wine } from "@/types/api/wine";
 import "./BottleDetailModal.css";
@@ -22,6 +22,10 @@ interface BottleDetailModalProps {
  */
 function BottleDetailModal({ open, bottle, onClose }: BottleDetailModalProps) {
   const wine = bottle?.wine;
+  const wineTypeName = wine?.wine_type_name;
+  const wineTypeBarColor = wineTypeName
+    ? wineTypeColor[wineTypeName as keyof typeof wineTypeColor]
+    : undefined;
 
   useEffect(() => {
     if (!open) return;
@@ -70,15 +74,34 @@ function BottleDetailModal({ open, bottle, onClose }: BottleDetailModalProps) {
                 )}
               </div>
               <div className="wine-card-info">
-                <h3
-                  style={{
-                    color: wine?.wine_type_name ? wineTypeColor[wine.wine_type_name as keyof typeof wineTypeColor] : "inherit",
-                  }}
-                >
-                  {wine?.name || "ワイン名不明"}
-                </h3>
+                <div className="wine-card-title-row">
+                  <span
+                    className="wine-type-bar"
+                    style={{
+                      backgroundColor: wineTypeBarColor ?? "#cccccc",
+                    }}
+                    aria-hidden
+                  />
+                  <h3>{wine?.name || "ワイン名不明"}</h3>
+                </div>
                 <p>
-                  タイプ <span>{wine?.wine_type_name || "—"}</span>
+                  タイプ{" "}
+                  {wineTypeName ? (
+                    <span
+                      className="wine-type-chip"
+                      style={{
+                        backgroundColor:
+                          wineTypeColorLight[wineTypeName as keyof typeof wineTypeColorLight] ||
+                          "#f0f0f0",
+                        color:
+                          wineTypeColor[wineTypeName as keyof typeof wineTypeColor] || "#666",
+                      }}
+                    >
+                      {wineTypeName}
+                    </span>
+                  ) : (
+                    <span>—</span>
+                  )}
                 </p>
                 <p>
                   生産国 <span>{wine?.country_name || "—"}</span>

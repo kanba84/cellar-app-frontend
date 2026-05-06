@@ -5,7 +5,7 @@ import { fetchWineTypes } from "../api/wineTypeApi";
 import { fetchCountries } from "../api/countryApi";
 import { fetchRegions } from "../api/regionApi";
 import { fetchAppellations } from "../api/appellationApi";
-import wineTypeColor from "../utils/wineUtils";
+import wineTypeColor, { wineTypeColorLight } from "../utils/wineUtils";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -15,6 +15,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
+import Chip from "@mui/material/Chip";
 
 function WineDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +32,19 @@ function WineDetailPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null); // ファイル入力を制御するref
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null); // ポーリング用のref
+
+  const editFieldSx = {
+    "& .MuiOutlinedInput-input": {
+      color: "#2C2C2C",
+      fontWeight: 500,
+    },
+    "& .MuiInputLabel-root": {
+      color: "#665E5E",
+    },
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#C8C1B5",
+    },
+  };
 
   useEffect(() => {
     if (!wineId) return;
@@ -238,18 +252,39 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
 
   return (
     <Box maxWidth={500} mx="auto" mt={4}>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        {/* 見出しの色をタイプに応じて変更 */}
-        <Typography
-          variant="h5"
-          gutterBottom
+      <Paper elevation={3} sx={{ p: 3, bgcolor: "#FDFCF0" }}>
+        {/* ワイン名 + カラーバー */}
+        <Box
           sx={{
-            color: wineTypeColor[wine.wine_type_name] || "inherit",
-            fontWeight: "bold",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 1.5,
+            mb: 2,
           }}
         >
-          {wine.name}
-        </Typography>
+          <Box
+            sx={{
+              width: "4px",
+              height: "1.5em",
+              backgroundColor: wineTypeColor[wine.wine_type_name] || "#cccccc",
+              flexShrink: 0,
+              borderRadius: "1px",
+              mt: "2px",
+            }}
+          />
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{
+              color: "#2C2C2C",
+              fontWeight: "bold",
+              mb: 0,
+              flex: 1,
+            }}
+          >
+            {wine.name}
+          </Typography>
+        </Box>
         {!editing ? (
           <Box>
             {/* 画像と右側情報を横並びに配置 */}
@@ -275,7 +310,7 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
                   sx={{
                     mt: 1,
                     fontSize: "0.8rem",
-                    color: "text.secondary",
+                    color: "#665E5E",
                     cursor: "pointer",
                     textDecoration: "underline",
                   }}
@@ -296,17 +331,58 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
 
               {/* ラベル画像の右に並ぶ項目 */}
               <Box>
-                <Typography sx={{ mb: 1 }}>ヴィンテージ: {wine.vintage}</Typography>
-                <Typography sx={{ mb: 1 }}>タイプ: {wine.wine_type_name}</Typography>
-                <Typography sx={{ mb: 1 }}>生産国: {wine.country_name}</Typography>
-                <Typography sx={{ mb: 1 }}>地域: {wine.region_name}</Typography>
+                <Typography sx={{ mb: 1, color: "#665E5E" }}>
+                  ヴィンテージ:{" "}
+                  <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
+                    {wine.vintage ?? "—"}
+                  </Box>
+                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                  <Typography sx={{ color: "#665E5E" }}>タイプ</Typography>
+                  {wine.wine_type_name ? (
+                    <Chip
+                      label={wine.wine_type_name}
+                      size="small"
+                      sx={{
+                        backgroundColor: wineTypeColorLight[wine.wine_type_name] || "#f0f0f0",
+                        color: wineTypeColor[wine.wine_type_name] || "#666",
+                        fontWeight: 600,
+                        height: "24px",
+                      }}
+                    />
+                  ) : (
+                    <Typography sx={{ color: "#2C2C2C" }}>—</Typography>
+                  )}
+                </Box>
+                <Typography sx={{ mb: 1, color: "#665E5E" }}>
+                  生産国:{" "}
+                  <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
+                    {wine.country_name ?? "—"}
+                  </Box>
+                </Typography>
+                <Typography sx={{ mb: 1, color: "#665E5E" }}>
+                  地域:{" "}
+                  <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
+                    {wine.region_name ?? "—"}
+                  </Box>
+                </Typography>
               </Box>
             </Box>
 
             {/* 下段（地域・アペラシオン・生産者） */}
             <Box sx={{ mt: 2 }}>
-              <Typography sx={{ mb: 1 }}>アペラシオン: {wine.appellation_name}</Typography>
-              <Typography sx={{ mb: 2 }}>生産者: {wine.producer}</Typography>
+              <Typography sx={{ mb: 1, color: "#665E5E" }}>
+                アペラシオン:{" "}
+                <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
+                  {wine.appellation_name ?? "—"}
+                </Box>
+              </Typography>
+              <Typography sx={{ mb: 2, color: "#665E5E" }}>
+                生産者:{" "}
+                <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
+                  {wine.producer ?? "—"}
+                </Box>
+              </Typography>
             </Box>
 
             <Button variant="contained" onClick={() => setEditing(true)}>
@@ -322,6 +398,7 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
                 value={editForm.name || ""}
                 onChange={handleChange}
                 variant="outlined"
+                sx={editFieldSx}
               />
               <TextField
                 label="ヴィンテージ"
@@ -330,6 +407,7 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
                 value={editForm.vintage || ""}
                 onChange={handleChange}
                 variant="outlined"
+                sx={editFieldSx}
               />
               <TextField
                 select
@@ -338,6 +416,7 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
                 value={editForm.wine_type_id || ""}
                 onChange={handleChange}
                 variant="outlined"
+                sx={editFieldSx}
               >
                 <MenuItem value="">
                   <em>選択してください</em>
@@ -355,6 +434,7 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
                 value={editForm.country_id || ""}
                 onChange={handleChange}
                 variant="outlined"
+                sx={editFieldSx}
               >
                 <MenuItem value="">
                   <em>選択してください</em>
@@ -372,6 +452,7 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
                 value={editForm.region_id || ""}
                 onChange={handleChange}
                 variant="outlined"
+                sx={editFieldSx}
               >
                 <MenuItem value="">
                   <em>選択してください</em>
@@ -390,6 +471,7 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
                 value={editForm.appellation_id || ""}
                 onChange={handleChange}
                 variant="outlined"
+                sx={editFieldSx}
               >
                 <MenuItem value="">
                   <em>選択してください</em>
@@ -406,6 +488,7 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
                 value={editForm.producer || ""}
                 onChange={handleChange}
                 variant="outlined"
+                sx={editFieldSx}
               />
               <Button type="submit" variant="contained">
                 保存
