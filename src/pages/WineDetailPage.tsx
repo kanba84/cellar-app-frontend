@@ -519,7 +519,11 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
               </Button>
               <Button
                 type="button"
-                onClick={() => setEditing(false)}
+                onClick={() => {
+                  setEditForm(wine);
+                  setEditing(false);
+                  setError(null);
+                }}
                 variant="outlined"
               >
                 キャンセル
