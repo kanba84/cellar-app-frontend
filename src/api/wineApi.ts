@@ -47,6 +47,7 @@ export const updateWine = async (
   id: number,
   data: UpdateWineRequest,
 ): Promise<Wine> => {
-  const response = await getAxiosClient().put<Wine>(`/wines/${id}`, data);
+  // 部分更新にしたいので PATCH を使用する（未送信フィールドを null で上書きしない）
+  const response = await getAxiosClient().patch<Wine>(`/wines/${id}`, data);
   return response.data;
 };
