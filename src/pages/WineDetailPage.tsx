@@ -1,11 +1,12 @@
-import { useEffect, useState, useRef} from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { fetchWineById, updateWine } from "../api/wineApi";
+import { fetchWineById, updateWine, fetchWineLLMInfo, type WineInfoResult } from "../api/wineApi";
 import { fetchWineTypes } from "../api/wineTypeApi";
 import { fetchCountries } from "../api/countryApi";
 import { fetchRegions } from "../api/regionApi";
 import { fetchAppellations } from "../api/appellationApi";
 import wineTypeColor, { wineTypeColorLight } from "../utils/wineUtils";
+import type { Wine, WineGrape } from "@/types/api/wine";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -16,11 +17,18 @@ import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
 import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import CircularProgress from "@mui/material/CircularProgress";
 
 function WineDetailPage() {
   const { id } = useParams<{ id: string }>();
   const wineId = id ? Number(id) : undefined;
-  const [wine, setWine] = useState<any>(null);
+  const [wine, setWine] = useState<Wine | null>(null);
   const [editForm, setEditForm] = useState<any>(null);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<any>(null);
@@ -30,8 +38,23 @@ function WineDetailPage() {
   const [regions, setRegions] = useState<any[]>([]);
   const [appellations, setAppellations] = useState<any[]>([]);
 
-  const fileInputRef = useRef<HTMLInputElement>(null); // ファイル入力を制御するref
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null); // ポーリング用のref
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // LLM補完関連のstate
+  const [llmDialogOpen, setLlmDialogOpen] = useState(false);
+  const [llmInfo, setLlmInfo] = useState<WineInfoResult | null>(null);
+  const [llmLoading, setLlmLoading] = useState(false);
+  const [llmError, setLlmError] = useState<string | null>(null);
+  const [selectedFields, setSelectedFields] = useState<{
+    producer: boolean;
+    grapes: boolean;
+    reference_price: boolean;
+  }>({
+    producer: false,
+    grapes: false,
+    reference_price: false,
+  });
 
   const editFieldSx = {
     "& .MuiOutlinedInput-input": {
@@ -61,7 +84,7 @@ function WineDetailPage() {
   }, [wineId]);
 
   // --- ポーリング監視用 useEffect ---
-useEffect(() => {
+  useEffect(() => {
     if (!wine?.label_image_url) return;
 
     const isDummy = wine.label_image_url.includes("temp_thumbnail");
@@ -103,9 +126,10 @@ useEffect(() => {
       "region_id",
       "vintage",
       "appellation_id",
+      "reference_price",
     ].includes(name)
       ? value
-        ? Number(value)
+        ? (["reference_price"].includes(name) ? parseFloat(value) : Number(value))
         : null
       : value;
 
@@ -139,6 +163,8 @@ useEffect(() => {
       region_id: editForm.region_id || null,
       appellation_id: editForm.appellation_id || null,
       producer: editForm.producer || null,
+      reference_price: editForm.reference_price != null && editForm.reference_price !== "" ? parseFloat(String(editForm.reference_price)) : null,
+      wine_grapes: editForm.wine_grapes && editForm.wine_grapes.length > 0 ? editForm.wine_grapes : undefined,
     };
 
     try {
@@ -150,87 +176,86 @@ useEffect(() => {
       setEditing(false);
       setError(null);
     } catch (err) {
-      console.error(err); // デバッグ用
+      console.error(err);
       setError("更新に失敗しました");
     }
   };
 
-const handleLabelImageChange = async (e: any) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+  const handleLabelImageChange = async (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  try {
-    // --- JPEGに変換 ---
-    const jpegBlob = await convertToJpeg(file, 0.85); // 品質85%
+    try {
+      // --- JPEGに変換 ---
+      const jpegBlob = await convertToJpeg(file, 0.85); // 品質85%
 
-    // --- FormDataを作成 ---
-    const formData = new FormData();
-    formData.append("label_image", jpegBlob, "label.jpg");
+      // --- FormDataを作成 ---
+      const formData = new FormData();
+      formData.append("label_image", jpegBlob, "label.jpg");
 
-    // --- PATCH送信 ---
-    if (!wineId) throw new Error("Wine ID is not available");
-    const response = await fetch(`https://cellar-app.local/api/wines/${wineId}`, {
-      method: "PATCH",
-      body: formData,
-    });
+      // --- PATCH送信 ---
+      if (!wineId) throw new Error("Wine ID is not available");
+      const response = await fetch(`https://cellar-app.local/api/wines/${wineId}`, {
+        method: "PATCH",
+        body: formData,
+      });
 
-    if (!response.ok) throw new Error("画像アップロードに失敗しました");
+      if (!response.ok) throw new Error("画像アップロードに失敗しました");
 
-    // ダミーURLが返るため一度再取得
-    const updated = await fetchWineById(wineId);
-    setWine(updated);
-  } catch (err) {
-    console.error(err);
-    setError("画像アップロードに失敗しました");
-  }
-};
+      // ダミーURLが返るため一度再取得
+      const updated = await fetchWineById(wineId);
+      setWine(updated);
+    } catch (err) {
+      console.error(err);
+      setError("画像アップロードに失敗しました");
+    }
+  };
 
-/**
- * 画像ファイルをJPEGに変換するユーティリティ
- * @param {File} file - 入力ファイル
- * @param {number} quality - 0〜1 (JPEG圧縮品質)
- * @returns {Promise<Blob>} JPEG Blob
- */
-async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const reader = new FileReader();
+  /**
+   * 画像ファイルをJPEGに変換するユーティリティ
+   * @param {File} file - 入力ファイル
+   * @param {number} quality - 0〜1 (JPEG圧縮品質)
+   * @returns {Promise<Blob>} JPEG Blob
+   */
+  async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
 
-    reader.onload = (event) => {
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          reject(new Error("Canvas context not available"));
-          return;
-        }
-        ctx.drawImage(img, 0, 0);
-        canvas.toBlob(
-          (blob) => {
-            if (blob) resolve(blob);
-            else reject(new Error("JPEG変換に失敗しました"));
-          },
-          "image/jpeg",
-          quality
-        );
+      reader.onload = (event) => {
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("Canvas context not available"));
+            return;
+          }
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob(
+            (blob) => {
+              if (blob) resolve(blob);
+              else reject(new Error("JPEG変換に失敗しました"));
+            },
+            "image/jpeg",
+            quality
+          );
+        };
+        img.onerror = (e) => {
+          console.error("Image load error:", e);
+          reject(e);
+        };
+        img.src = (event.target?.result as string) || "";
       };
-      img.onerror = (e) => {
-        console.error("Image load error:", e);
+
+      reader.onerror = (e) => {
+        console.error("FileReader error:", e);
         reject(e);
       };
-      img.src = (event.target?.result as string) || "";
-    };
-
-    reader.onerror = (e) => {
-      console.error("FileReader error:", e);
-      reject(e);
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
+      reader.readAsDataURL(file);
+    });
+  }
 
   const handleSelectImageSource = () => {
     // モバイルでは "capture" 属性でカメラ選択が可能
@@ -238,13 +263,106 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
     if (input) input.click();
   };
 
+  // LLM補完ボタンのハンドラ
+  const handleOpenLLMDialog = async () => {
+    if (!wineId) return;
+
+    setLlmLoading(true);
+    setLlmError(null);
+    setLlmInfo(null);
+    setLlmDialogOpen(true);
+
+    try {
+      const info = await fetchWineLLMInfo(wineId);
+      setLlmInfo(info);
+    } catch (err) {
+      console.error("LLM情報取得エラー:", err);
+      setLlmError("AI補完情報の取得に失敗しました");
+    } finally {
+      setLlmLoading(false);
+    }
+  };
+
+  // LLM情報取得をリトライ
+  const handleRetryLLMInfo = async () => {
+    if (!wineId) return;
+
+    setLlmLoading(true);
+    setLlmError(null);
+    setLlmInfo(null);
+
+    try {
+      const info = await fetchWineLLMInfo(wineId);
+      setLlmInfo(info);
+    } catch (err) {
+      console.error("LLM情報取得エラー:", err);
+      setLlmError("AI補完情報の取得に失敗しました");
+    } finally {
+      setLlmLoading(false);
+    }
+  };
+
+  // チェックボックス変更ハンドラ
+  const handleLLMFieldChange = (field: keyof typeof selectedFields) => {
+    setSelectedFields((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
+  // LLM補完結果を適用
+  const handleApplyLLMInfo = () => {
+    if (!llmInfo) return;
+
+    const updated = { ...editForm };
+
+    if (selectedFields.producer && llmInfo.producer) {
+      updated.producer = llmInfo.producer;
+    }
+
+    if (selectedFields.grapes && llmInfo.grapes && llmInfo.grapes.length > 0) {
+      // LLMから返ってくるGrapeInfoを、WineGrapeDTO形式に変換
+      updated.wine_grapes = llmInfo.grapes.map((grape, index) => ({
+        name: grape.name,
+        percentage: grape.percentage || null,
+        display_order: index,
+      }));
+    }
+
+    if (selectedFields.reference_price && llmInfo.reference_price_jpy) {
+      updated.reference_price = llmInfo.reference_price_jpy;
+    }
+
+    setEditForm(updated);
+    setLlmDialogOpen(false);
+    setSelectedFields({
+      producer: false,
+      grapes: false,
+      reference_price: false,
+    });
+  };
+
+  // ブドウ品種を表示用文字列に変換
+  const formatGrapes = (grapes: WineGrape[] | undefined): string => {
+    if (!grapes || grapes.length === 0) return "—";
+    return grapes
+      .sort((a, b) => a.display_order - b.display_order)
+      .map((grape) => {
+        if (grape.percentage) {
+          return `${grape.name} (${grape.percentage}%)`;
+        }
+        return grape.name;
+      })
+      .join(", ");
+  };
+
   const filteredRegions = editForm
     ? regions.filter((region) => region.country_id === editForm.country_id)
     : [];
   const filteredAppellations = editForm
     ? appellations.filter(
-        (appellation) => appellation.region_id === editForm.region_id,
-      )
+      (appellation) => appellation.region_id === editForm.region_id,
+    )
     : [];
 
   if (error) return <Alert severity="error">{error}</Alert>;
@@ -290,7 +408,7 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
             {/* 画像と右側情報を横並びに配置 */}
             <Box display="flex" alignItems="flex-start" mb={2} gap={3}>
               <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              {/* ラベル画像 */}
+                {/* ラベル画像 */}
                 <Box
                   component="img"
                   src={wine.label_image_url || "https://cellar-app.local/labels/sample_thumbnail.png"}
@@ -370,7 +488,7 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
               </Box>
             </Box>
 
-            {/* 下段（地域・アペラシオン・生産者） */}
+            {/* 下段（地域・アペラシオン・生産者・参考価格・ブドウ品種） */}
             <Box sx={{ mt: 2 }}>
               <Typography sx={{ mb: 1, color: "#665E5E" }}>
                 アペラシオン:{" "}
@@ -382,6 +500,18 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
                 生産者:{" "}
                 <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
                   {wine.producer ?? "—"}
+                </Box>
+              </Typography>
+              <Typography sx={{ mb: 1, color: "#665E5E" }}>
+                参考価格:{" "}
+                <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
+                  {wine.reference_price ? `¥${wine.reference_price.toLocaleString()}` : "—"}
+                </Box>
+              </Typography>
+              <Typography sx={{ mb: 1, color: "#665E5E" }}>
+                ブドウ品種:{" "}
+                <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
+                  {formatGrapes(wine.wine_grapes)}
                 </Box>
               </Typography>
 
@@ -514,6 +644,35 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
                 variant="outlined"
                 sx={editFieldSx}
               />
+              <TextField
+                label="参考価格（円）"
+                name="reference_price"
+                type="number"
+                inputProps={{ step: "0.01" }}
+                value={editForm.reference_price || ""}
+                onChange={handleChange}
+                variant="outlined"
+                sx={editFieldSx}
+              />
+              <TextField
+                label="ブドウ品種"
+                name="wine_grapes_display"
+                value={formatGrapes(editForm.wine_grapes)}
+                disabled
+                variant="outlined"
+                sx={editFieldSx}
+                helperText="下のボタンで自動補完またはAIで補完を使用して編集してください"
+              />
+
+              <Button
+                type="button"
+                variant="outlined"
+                onClick={handleOpenLLMDialog}
+                disabled={llmLoading}
+              >
+                {llmLoading ? <CircularProgress size={24} /> : "AIで情報を補完"}
+              </Button>
+
               <Button type="submit" variant="contained">
                 保存
               </Button>
@@ -532,6 +691,118 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
           </Box>
         )}
       </Paper>
+
+      {/* LLM補完ダイアログ */}
+      <Dialog open={llmDialogOpen} onClose={() => setLlmDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>AIで情報を補完</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          {llmError && (
+            <Alert
+              severity="error"
+              action={
+                <Button
+                  size="small"
+                  onClick={handleRetryLLMInfo}
+                  disabled={llmLoading}
+                  sx={{ color: "inherit" }}
+                >
+                  {llmLoading ? "再試行中..." : "再試行"}
+                </Button>
+              }
+              sx={{ mb: 2 }}
+            >
+              {llmError}
+            </Alert>
+          )}
+          {llmInfo && (
+            <Stack spacing={2}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedFields.producer}
+                    onChange={() => handleLLMFieldChange("producer")}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      生産者
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#666" }}>
+                      {llmInfo.producer || "未取得"}
+                    </Typography>
+                  </Box>
+                }
+              />
+
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedFields.grapes}
+                    onChange={() => handleLLMFieldChange("grapes")}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      ブドウ品種
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#666" }}>
+                      {llmInfo.grapes && llmInfo.grapes.length > 0
+                        ? llmInfo.grapes
+                          .map((g) => (g.percentage ? `${g.name} (${g.percentage}%)` : g.name))
+                          .join(", ")
+                        : "未取得"}
+                    </Typography>
+                  </Box>
+                }
+              />
+
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedFields.reference_price}
+                    onChange={() => handleLLMFieldChange("reference_price")}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      参考価格（日本円）
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#666" }}>
+                      {llmInfo.reference_price_jpy
+                        ? `¥${llmInfo.reference_price_jpy.toLocaleString()}`
+                        : "未取得"}
+                    </Typography>
+                  </Box>
+                }
+              />
+
+              {llmInfo.tasting_note && (
+                <Box sx={{ pt: 1, borderTop: "1px solid #ddd" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                    テイスティングノート
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#666", fontStyle: "italic" }}>
+                    {llmInfo.tasting_note}
+                  </Typography>
+                </Box>
+              )}
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setLlmDialogOpen(false)}>キャンセル</Button>
+          <Button
+            onClick={handleApplyLLMInfo}
+            variant="contained"
+            disabled={!selectedFields.producer && !selectedFields.grapes && !selectedFields.reference_price}
+          >
+            適用
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
