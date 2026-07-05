@@ -167,13 +167,12 @@ function BottleItem({
 
           {/* その他の情報 */}
           <Typography variant="body2" sx={{ color: "#665E5E", lineHeight: 1.4 }}>
-            {bottle.wine?.region_name && (
-              <>地域: {bottle.wine.region_name}</>
-            )}
+            地域: {bottle.wine?.region_name || "—"}
             {bottle.wine?.region_name && bottle.wine?.producer && <> / </>}
-            {bottle.wine?.producer && (
-              <>生産者: {bottle.wine.producer}</>
-            )}
+            {!bottle.wine?.region_name && bottle.wine?.producer && <> / </>}
+            生産者: {bottle.wine?.producer || "—"}
+            <br />
+            参考価格: {bottle.wine?.reference_price ? `¥${bottle.wine.reference_price.toLocaleString()}` : "—"}
           </Typography>
         </Box>
       </Stack>

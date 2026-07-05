@@ -7,6 +7,12 @@
  * Wine のレスポンス型（WineDTO に基づく）
  * API から取得するワイン情報
  */
+export interface WineGrape {
+  name: string;
+  percentage: number | null;
+  display_order: number;
+}
+
 export interface Wine {
   id: number;
   name: string;
@@ -24,6 +30,8 @@ export interface Wine {
   designation_type_id: number | null;
   designation_type_name: string | null;
   label_image_url: string | null;
+  reference_price: number | null;
+  wine_grapes: WineGrape[];
 
   has_stock: boolean;
   stock_count: number;
@@ -55,4 +63,6 @@ export interface UpdateWineRequest {
   producer?: string | null;
   appellation_id?: number | null;
   label_image_url?: string | null;
+  reference_price?: number | null;
+  wine_grapes?: WineGrape[];
 }

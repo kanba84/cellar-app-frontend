@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { fetchWineById, updateWine } from "../api/wineApi";
+import { fetchWineById, updateWine, fetchWineLLMInfo, type WineInfoResult } from "../api/wineApi";
 import { fetchWineTypes } from "../api/wineTypeApi";
 import { fetchCountries } from "../api/countryApi";
 import { fetchRegions } from "../api/regionApi";
@@ -17,11 +17,18 @@ import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import Alert from "@mui/material/Alert";
 import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import CircularProgress from "@mui/material/CircularProgress";
 
 function WineDetailPage() {
   const { id } = useParams<{ id: string }>();
   const wineId = id ? Number(id) : undefined;
-  const [wine, setWine] = useState<any>(null);
+  const [wine, setWine] = useState<Wine | null>(null);
   const [editForm, setEditForm] = useState<any>(null);
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<any>(null);
@@ -31,8 +38,23 @@ function WineDetailPage() {
   const [regions, setRegions] = useState<any[]>([]);
   const [appellations, setAppellations] = useState<any[]>([]);
 
-  const fileInputRef = useRef<HTMLInputElement>(null); // ファイル入力を制御するref
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null); // ポーリング用のref
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // LLM補完関連のstate
+  const [llmDialogOpen, setLlmDialogOpen] = useState(false);
+  const [llmInfo, setLlmInfo] = useState<WineInfoResult | null>(null);
+  const [llmLoading, setLlmLoading] = useState(false);
+  const [llmError, setLlmError] = useState<string | null>(null);
+  const [selectedFields, setSelectedFields] = useState<{
+    producer: boolean;
+    grapes: boolean;
+    reference_price: boolean;
+  }>({
+    producer: false,
+    grapes: false,
+    reference_price: false,
+  });
 
   const editFieldSx = {
     "& .MuiOutlinedInput-input": {
@@ -104,9 +126,10 @@ function WineDetailPage() {
       "region_id",
       "vintage",
       "appellation_id",
+      "reference_price",
     ].includes(name)
       ? value
-        ? Number(value)
+        ? (["reference_price"].includes(name) ? parseFloat(value) : Number(value))
         : null
       : value;
 
@@ -140,6 +163,8 @@ function WineDetailPage() {
       region_id: editForm.region_id || null,
       appellation_id: editForm.appellation_id || null,
       producer: editForm.producer || null,
+      reference_price: editForm.reference_price != null && editForm.reference_price !== "" ? parseFloat(String(editForm.reference_price)) : null,
+      wine_grapes: editForm.wine_grapes && editForm.wine_grapes.length > 0 ? editForm.wine_grapes : undefined,
     };
 
     try {
@@ -151,7 +176,7 @@ function WineDetailPage() {
       setEditing(false);
       setError(null);
     } catch (err) {
-      console.error(err); // デバッグ用
+      console.error(err);
       setError("更新に失敗しました");
     }
   };
@@ -232,11 +257,103 @@ function WineDetailPage() {
     });
   }
 
-
   const handleSelectImageSource = () => {
     // モバイルでは "capture" 属性でカメラ選択が可能
     const input = fileInputRef.current;
     if (input) input.click();
+  };
+
+  // LLM補完ボタンのハンドラ
+  const handleOpenLLMDialog = async () => {
+    if (!wineId) return;
+
+    setLlmLoading(true);
+    setLlmError(null);
+    setLlmInfo(null);
+    setLlmDialogOpen(true);
+
+    try {
+      const info = await fetchWineLLMInfo(wineId);
+      setLlmInfo(info);
+    } catch (err) {
+      console.error("LLM情報取得エラー:", err);
+      setLlmError("AI補完情報の取得に失敗しました");
+    } finally {
+      setLlmLoading(false);
+    }
+  };
+
+  // LLM情報取得をリトライ
+  const handleRetryLLMInfo = async () => {
+    if (!wineId) return;
+
+    setLlmLoading(true);
+    setLlmError(null);
+    setLlmInfo(null);
+
+    try {
+      const info = await fetchWineLLMInfo(wineId);
+      setLlmInfo(info);
+    } catch (err) {
+      console.error("LLM情報取得エラー:", err);
+      setLlmError("AI補完情報の取得に失敗しました");
+    } finally {
+      setLlmLoading(false);
+    }
+  };
+
+  // チェックボックス変更ハンドラ
+  const handleLLMFieldChange = (field: keyof typeof selectedFields) => {
+    setSelectedFields((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
+  // LLM補完結果を適用
+  const handleApplyLLMInfo = () => {
+    if (!llmInfo) return;
+
+    const updated = { ...editForm };
+
+    if (selectedFields.producer && llmInfo.producer) {
+      updated.producer = llmInfo.producer;
+    }
+
+    if (selectedFields.grapes && llmInfo.grapes && llmInfo.grapes.length > 0) {
+      // LLMから返ってくるGrapeInfoを、WineGrapeDTO形式に変換
+      updated.wine_grapes = llmInfo.grapes.map((grape, index) => ({
+        name: grape.name,
+        percentage: grape.percentage || null,
+        display_order: index,
+      }));
+    }
+
+    if (selectedFields.reference_price && llmInfo.reference_price_jpy) {
+      updated.reference_price = llmInfo.reference_price_jpy;
+    }
+
+    setEditForm(updated);
+    setLlmDialogOpen(false);
+    setSelectedFields({
+      producer: false,
+      grapes: false,
+      reference_price: false,
+    });
+  };
+
+  // ブドウ品種を表示用文字列に変換
+  const formatGrapes = (grapes: WineGrape[] | undefined): string => {
+    if (!grapes || grapes.length === 0) return "—";
+    return grapes
+      .sort((a, b) => a.display_order - b.display_order)
+      .map((grape) => {
+        if (grape.percentage) {
+          return `${grape.name} (${grape.percentage}%)`;
+        }
+        return grape.name;
+      })
+      .join(", ");
   };
 
   const filteredRegions = editForm
@@ -375,7 +492,7 @@ function WineDetailPage() {
               </Box>
             </Box>
 
-            {/* 下段（地域・アペラシオン・生産者） */}
+            {/* 下段（地域・アペラシオン・生産者・参考価格・ブドウ品種） */}
             <Box sx={{ mt: 2 }}>
               <Typography sx={{ mb: 1, color: "#665E5E" }}>
                 アペラシオン:{" "}
@@ -387,6 +504,18 @@ function WineDetailPage() {
                 生産者:{" "}
                 <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
                   {wine.producer ?? "—"}
+                </Box>
+              </Typography>
+              <Typography sx={{ mb: 1, color: "#665E5E" }}>
+                参考価格:{" "}
+                <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
+                  {wine.reference_price ? `¥${wine.reference_price.toLocaleString()}` : "—"}
+                </Box>
+              </Typography>
+              <Typography sx={{ mb: 1, color: "#665E5E" }}>
+                ブドウ品種:{" "}
+                <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
+                  {formatGrapes(wine.wine_grapes)}
                 </Box>
               </Typography>
 
@@ -519,6 +648,35 @@ function WineDetailPage() {
                 variant="outlined"
                 sx={editFieldSx}
               />
+              <TextField
+                label="参考価格（円）"
+                name="reference_price"
+                type="number"
+                inputProps={{ step: "0.01" }}
+                value={editForm.reference_price || ""}
+                onChange={handleChange}
+                variant="outlined"
+                sx={editFieldSx}
+              />
+              <TextField
+                label="ブドウ品種"
+                name="wine_grapes_display"
+                value={formatGrapes(editForm.wine_grapes)}
+                disabled
+                variant="outlined"
+                sx={editFieldSx}
+                helperText="下のボタンで自動補完またはAIで補完を使用して編集してください"
+              />
+
+              <Button
+                type="button"
+                variant="outlined"
+                onClick={handleOpenLLMDialog}
+                disabled={llmLoading}
+              >
+                {llmLoading ? <CircularProgress size={24} /> : "AIで情報を補完"}
+              </Button>
+
               <Button type="submit" variant="contained">
                 保存
               </Button>
@@ -537,6 +695,118 @@ function WineDetailPage() {
           </Box>
         )}
       </Paper>
+
+      {/* LLM補完ダイアログ */}
+      <Dialog open={llmDialogOpen} onClose={() => setLlmDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>AIで情報を補完</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          {llmError && (
+            <Alert
+              severity="error"
+              action={
+                <Button
+                  size="small"
+                  onClick={handleRetryLLMInfo}
+                  disabled={llmLoading}
+                  sx={{ color: "inherit" }}
+                >
+                  {llmLoading ? "再試行中..." : "再試行"}
+                </Button>
+              }
+              sx={{ mb: 2 }}
+            >
+              {llmError}
+            </Alert>
+          )}
+          {llmInfo && (
+            <Stack spacing={2}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedFields.producer}
+                    onChange={() => handleLLMFieldChange("producer")}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      生産者
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#666" }}>
+                      {llmInfo.producer || "未取得"}
+                    </Typography>
+                  </Box>
+                }
+              />
+
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedFields.grapes}
+                    onChange={() => handleLLMFieldChange("grapes")}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      ブドウ品種
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#666" }}>
+                      {llmInfo.grapes && llmInfo.grapes.length > 0
+                        ? llmInfo.grapes
+                          .map((g) => (g.percentage ? `${g.name} (${g.percentage}%)` : g.name))
+                          .join(", ")
+                        : "未取得"}
+                    </Typography>
+                  </Box>
+                }
+              />
+
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={selectedFields.reference_price}
+                    onChange={() => handleLLMFieldChange("reference_price")}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      参考価格（日本円）
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#666" }}>
+                      {llmInfo.reference_price_jpy
+                        ? `¥${llmInfo.reference_price_jpy.toLocaleString()}`
+                        : "未取得"}
+                    </Typography>
+                  </Box>
+                }
+              />
+
+              {llmInfo.tasting_note && (
+                <Box sx={{ pt: 1, borderTop: "1px solid #ddd" }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                    テイスティングノート
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "#666", fontStyle: "italic" }}>
+                    {llmInfo.tasting_note}
+                  </Typography>
+                </Box>
+              )}
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setLlmDialogOpen(false)}>キャンセル</Button>
+          <Button
+            onClick={handleApplyLLMInfo}
+            variant="contained"
+            disabled={!selectedFields.producer && !selectedFields.grapes && !selectedFields.reference_price}
+          >
+            適用
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

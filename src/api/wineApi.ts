@@ -3,6 +3,16 @@ import type { Wine, CreateWineRequest, UpdateWineRequest } from '@/types/api/win
 import type { CreateWineWithBottleRequest } from '@/types/form/wineWithBottle';
 import type { Bottle } from '@/types/api/bottle';
 
+export interface WineInfoResult {
+  producer: string | null;
+  grapes: {
+    name: string;
+    percentage: number | null;
+  }[];
+  tasting_note: string | null;
+  reference_price_jpy: number | null;
+}
+
 /**
  * ワイン情報を新規作成する
  */
@@ -51,3 +61,15 @@ export const updateWine = async (
   const response = await getAxiosClient().patch<Wine>(`/wines/${id}`, data);
   return response.data;
 };
+
+/**
+ * LLM を使用してワイン情報を補完する
+ */
+export const fetchWineLLMInfo = async (id: number): Promise<WineInfoResult> => {
+  // LLM呼び出しはタイムアウトを長めに設定（60秒）
+  const response = await getAxiosClient().get<WineInfoResult>(`/wines/${id}/llm-info`, {
+    timeout: 60000,
+  });
+  return response.data;
+};
+
