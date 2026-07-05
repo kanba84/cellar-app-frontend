@@ -8,6 +8,7 @@ import Switch from "@mui/material/Switch";
 import Chip from "@mui/material/Chip";
 import { useNavigate } from "react-router-dom";
 import wineTypeColor, { wineTypeColorLight } from "@/utils/wineUtils";
+import { buildImageUrl } from "@/utils/imageUtils";
 import "flag-icons/css/flag-icons.min.css";
 import MenuItem from "@mui/material/MenuItem";
 import type { Bottle } from "@/types/api/bottle";
@@ -82,7 +83,11 @@ function BottleItem({
       <Stack direction="row" spacing={2} alignItems="flex-start" width="100%">
         <Box
           component="img"
-          src={bottle.wine?.label_image_url || "/labels/sample_thumbnail.png"}
+          src={
+            buildImageUrl(bottle.wine?.label_image_url) ||
+            buildImageUrl("/labels/sample_thumbnail.png") ||
+            ""
+          }
           alt={`${bottle.wine?.name} ラベル`}
           onClick={(e: React.MouseEvent) => {
             if (onBottleDetail) {

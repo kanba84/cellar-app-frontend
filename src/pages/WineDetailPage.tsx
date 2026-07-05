@@ -6,7 +6,7 @@ import { fetchCountries } from "../api/countryApi";
 import { fetchRegions } from "../api/regionApi";
 import { fetchAppellations } from "../api/appellationApi";
 import wineTypeColor, { wineTypeColorLight } from "../utils/wineUtils";
-import type { Wine, WineGrape } from "@/types/api/wine";
+import { buildImageUrl } from "@/utils/imageUtils";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -411,7 +411,11 @@ function WineDetailPage() {
                 {/* ラベル画像 */}
                 <Box
                   component="img"
-                  src={wine.label_image_url || "https://cellar-app.local/labels/sample_thumbnail.png"}
+                  src={
+                    buildImageUrl(wine.label_image_url) ||
+                    buildImageUrl("/labels/sample_thumbnail.png") ||
+                    ""
+                  }
                   alt={`${wine.name} label`}
                   sx={{
                     width: 120,

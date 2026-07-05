@@ -28,6 +28,14 @@ export default defineConfig(({ mode }) => {
             ? (path) => path.replace(/^\/api/, '') // localhost用
             : (path) => path, // cellar-app.localはそのまま
         },
+        '/labels': {
+          target,
+          changeOrigin: true,
+          secure: false,
+          rewrite: isLocalhost
+            ? (path) => path.replace(/^\/labels/, '/labels')
+            : (path) => path,
+        },
       },
     },
   }
