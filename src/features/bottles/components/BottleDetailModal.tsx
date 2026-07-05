@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import wineTypeColor, { wineTypeColorLight } from "@/utils/wineUtils";
+import { buildImageUrl } from "@/utils/imageUtils";
 import type { Bottle } from "@/types/api/bottle";
 import type { Wine } from "@/types/api/wine";
 import "./BottleDetailModal.css";
@@ -66,7 +67,7 @@ function BottleDetailModal({ open, bottle, onClose }: BottleDetailModalProps) {
               <div className="wine-card-label">
                 {wine?.label_image_url ? (
                   <img
-                    src={wine.label_image_url}
+                    src={buildImageUrl(wine.label_image_url) || undefined}
                     alt={`${wine?.name || "ワイン"} ラベル`}
                   />
                 ) : (

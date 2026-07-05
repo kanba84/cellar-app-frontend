@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef} from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { fetchWineById, updateWine } from "../api/wineApi";
 import { fetchWineTypes } from "../api/wineTypeApi";
@@ -6,6 +6,7 @@ import { fetchCountries } from "../api/countryApi";
 import { fetchRegions } from "../api/regionApi";
 import { fetchAppellations } from "../api/appellationApi";
 import wineTypeColor, { wineTypeColorLight } from "../utils/wineUtils";
+import { buildImageUrl } from "@/utils/imageUtils";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -61,7 +62,7 @@ function WineDetailPage() {
   }, [wineId]);
 
   // --- ポーリング監視用 useEffect ---
-useEffect(() => {
+  useEffect(() => {
     if (!wine?.label_image_url) return;
 
     const isDummy = wine.label_image_url.includes("temp_thumbnail");
@@ -155,81 +156,81 @@ useEffect(() => {
     }
   };
 
-const handleLabelImageChange = async (e: any) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+  const handleLabelImageChange = async (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  try {
-    // --- JPEGに変換 ---
-    const jpegBlob = await convertToJpeg(file, 0.85); // 品質85%
+    try {
+      // --- JPEGに変換 ---
+      const jpegBlob = await convertToJpeg(file, 0.85); // 品質85%
 
-    // --- FormDataを作成 ---
-    const formData = new FormData();
-    formData.append("label_image", jpegBlob, "label.jpg");
+      // --- FormDataを作成 ---
+      const formData = new FormData();
+      formData.append("label_image", jpegBlob, "label.jpg");
 
-    // --- PATCH送信 ---
-    if (!wineId) throw new Error("Wine ID is not available");
-    const response = await fetch(`https://cellar-app.local/api/wines/${wineId}`, {
-      method: "PATCH",
-      body: formData,
-    });
+      // --- PATCH送信 ---
+      if (!wineId) throw new Error("Wine ID is not available");
+      const response = await fetch(`https://cellar-app.local/api/wines/${wineId}`, {
+        method: "PATCH",
+        body: formData,
+      });
 
-    if (!response.ok) throw new Error("画像アップロードに失敗しました");
+      if (!response.ok) throw new Error("画像アップロードに失敗しました");
 
-    // ダミーURLが返るため一度再取得
-    const updated = await fetchWineById(wineId);
-    setWine(updated);
-  } catch (err) {
-    console.error(err);
-    setError("画像アップロードに失敗しました");
-  }
-};
+      // ダミーURLが返るため一度再取得
+      const updated = await fetchWineById(wineId);
+      setWine(updated);
+    } catch (err) {
+      console.error(err);
+      setError("画像アップロードに失敗しました");
+    }
+  };
 
-/**
- * 画像ファイルをJPEGに変換するユーティリティ
- * @param {File} file - 入力ファイル
- * @param {number} quality - 0〜1 (JPEG圧縮品質)
- * @returns {Promise<Blob>} JPEG Blob
- */
-async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const reader = new FileReader();
+  /**
+   * 画像ファイルをJPEGに変換するユーティリティ
+   * @param {File} file - 入力ファイル
+   * @param {number} quality - 0〜1 (JPEG圧縮品質)
+   * @returns {Promise<Blob>} JPEG Blob
+   */
+  async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
 
-    reader.onload = (event) => {
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          reject(new Error("Canvas context not available"));
-          return;
-        }
-        ctx.drawImage(img, 0, 0);
-        canvas.toBlob(
-          (blob) => {
-            if (blob) resolve(blob);
-            else reject(new Error("JPEG変換に失敗しました"));
-          },
-          "image/jpeg",
-          quality
-        );
+      reader.onload = (event) => {
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("Canvas context not available"));
+            return;
+          }
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob(
+            (blob) => {
+              if (blob) resolve(blob);
+              else reject(new Error("JPEG変換に失敗しました"));
+            },
+            "image/jpeg",
+            quality
+          );
+        };
+        img.onerror = (e) => {
+          console.error("Image load error:", e);
+          reject(e);
+        };
+        img.src = (event.target?.result as string) || "";
       };
-      img.onerror = (e) => {
-        console.error("Image load error:", e);
+
+      reader.onerror = (e) => {
+        console.error("FileReader error:", e);
         reject(e);
       };
-      img.src = (event.target?.result as string) || "";
-    };
-
-    reader.onerror = (e) => {
-      console.error("FileReader error:", e);
-      reject(e);
-    };
-    reader.readAsDataURL(file);
-  });
-}
+      reader.readAsDataURL(file);
+    });
+  }
 
 
   const handleSelectImageSource = () => {
@@ -243,8 +244,8 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
     : [];
   const filteredAppellations = editForm
     ? appellations.filter(
-        (appellation) => appellation.region_id === editForm.region_id,
-      )
+      (appellation) => appellation.region_id === editForm.region_id,
+    )
     : [];
 
   if (error) return <Alert severity="error">{error}</Alert>;
@@ -290,10 +291,14 @@ async function convertToJpeg(file: File, quality = 0.9): Promise<Blob> {
             {/* 画像と右側情報を横並びに配置 */}
             <Box display="flex" alignItems="flex-start" mb={2} gap={3}>
               <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              {/* ラベル画像 */}
+                {/* ラベル画像 */}
                 <Box
                   component="img"
-                  src={wine.label_image_url || "https://cellar-app.local/labels/sample_thumbnail.png"}
+                  src={
+                    buildImageUrl(wine.label_image_url) ||
+                    buildImageUrl("/labels/sample_thumbnail.png") ||
+                    ""
+                  }
                   alt={`${wine.name} label`}
                   sx={{
                     width: 120,
