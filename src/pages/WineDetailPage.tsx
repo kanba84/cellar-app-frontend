@@ -5,6 +5,7 @@ import { fetchWineTypes } from "../api/wineTypeApi";
 import { fetchCountries } from "../api/countryApi";
 import { fetchRegions } from "../api/regionApi";
 import { fetchAppellations } from "../api/appellationApi";
+import type { Wine, WineGrape } from "../types/api/wine";
 import wineTypeColor, { wineTypeColorLight } from "../utils/wineUtils";
 import { buildImageUrl } from "@/utils/imageUtils";
 
