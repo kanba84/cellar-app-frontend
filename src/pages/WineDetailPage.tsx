@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { fetchWineById, updateWine, fetchWineLLMInfo, type WineInfoResult } from "../api/wineApi";
 import { fetchWineTypes } from "../api/wineTypeApi";
 import { fetchCountries } from "../api/countryApi";
@@ -25,6 +25,7 @@ import DialogActions from "@mui/material/DialogActions";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 function WineDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -371,6 +372,14 @@ function WineDetailPage() {
 
   return (
     <Box maxWidth={500} mx="auto" mt={4}>
+      <Button
+        component={Link}
+        to="/"
+        startIcon={<ArrowBackIcon />}
+        sx={{ mb: 2, color: "#665E5E" }}
+      >
+        ボトル一覧に戻る
+      </Button>
       <Paper elevation={3} sx={{ p: 3, bgcolor: "#FDFCF0" }}>
         {/* ワイン名 + カラーバー */}
         <Box

@@ -205,6 +205,12 @@ export default function BottleListView({
         open={!!detailBottle}
         bottle={detailBottle}
         onClose={closeDetail}
+        editId={editId}
+        editForm={editForm}
+        onEditStart={onEditStart}
+        onEditChange={onEditChange}
+        onEditSave={onEditSave}
+        onEditCancel={onEditCancel}
       />
 
       {/* メイン表示 */}
