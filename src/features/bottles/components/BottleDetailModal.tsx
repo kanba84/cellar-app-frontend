@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { Button, MenuItem, Stack, Switch, TextField } from "@mui/material";
 import wineTypeColor, { wineTypeColorLight } from "@/utils/wineUtils";
 import { buildImageUrl } from "@/utils/imageUtils";
 import type { Bottle } from "@/types/api/bottle";
@@ -16,12 +18,29 @@ interface BottleDetailModalProps {
   open: boolean;
   bottle: Bottle | null;
   onClose: () => void;
+  editId: number | null;
+  editForm: Partial<Bottle>;
+  onEditStart: (bottle: Bottle | null) => void;
+  onEditChange: (form: Partial<Bottle>) => void;
+  onEditSave: (bottleId: number, form: Partial<Bottle>) => Promise<void>;
+  onEditCancel: () => void;
 }
 
 /**
  * セラー／リスト共通のボトル詳細モーダル（cellar-ui のモーダル相当）
  */
-function BottleDetailModal({ open, bottle, onClose }: BottleDetailModalProps) {
+function BottleDetailModal({
+  open,
+  bottle,
+  onClose,
+  editId,
+  editForm,
+  onEditStart,
+  onEditChange,
+  onEditSave,
+  onEditCancel,
+}: BottleDetailModalProps) {
+  const navigate = useNavigate();
   const wine = bottle?.wine;
   const wineTypeName = wine?.wine_type_name;
   const wineTypeBarColor = wineTypeName
@@ -36,6 +55,28 @@ function BottleDetailModal({ open, bottle, onClose }: BottleDetailModalProps) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
+  const isEditing = bottle ? editId === bottle.id : false;
+
+  const handleEditStart = () => {
+    if (!bottle) return;
+
+    onEditStart(bottle);
+  };
+
+  const handleOpenedToggle = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.stopPropagation();
+    const isOpened = event.target.checked;
+    if (!bottle) return;
+
+    if (isEditing) {
+      onEditChange({ ...editForm, is_opened: isOpened });
+      return;
+    }
+
+    await onEditSave(bottle.id, { is_opened: isOpened });
+    onClose();
+  };
 
   const modal = (
     <AnimatePresence>
@@ -83,7 +124,22 @@ function BottleDetailModal({ open, bottle, onClose }: BottleDetailModalProps) {
                     }}
                     aria-hidden
                   />
-                  <h3>{wine?.name || "ワイン名不明"}</h3>
+                  <h3
+                    className="cellar-bottle-modal-wine-name"
+                    onClick={() => {
+                      if (wine?.id) navigate(`/wines/${wine.id}`);
+                    }}
+                    onKeyDown={(event) => {
+                      if ((event.key === "Enter" || event.key === " ") && wine?.id) {
+                        event.preventDefault();
+                        navigate(`/wines/${wine.id}`);
+                      }
+                    }}
+                    role={wine?.id ? "link" : undefined}
+                    tabIndex={wine?.id ? 0 : undefined}
+                  >
+                    {wine?.name || "ワイン名不明"}
+                  </h3>
                 </div>
                 <p>
                   タイプ{" "}
@@ -118,14 +174,93 @@ function BottleDetailModal({ open, bottle, onClose }: BottleDetailModalProps) {
                 </p>
                 <p>
                   棚位置{" "}
-                  <span>
-                    {bottle.row_number}行 {bottle.column_number}列
-                  </span>
+                  {isEditing ? (
+                    <Stack direction="row" spacing={1}>
+                      <TextField
+                        select
+                        label="棚 行"
+                        size="small"
+                        value={String(editForm.row_number ?? bottle.row_number ?? "")}
+                        onChange={(e) =>
+                          onEditChange({
+                            ...editForm,
+                            row_number: e.target.value ? Number(e.target.value) : undefined,
+                          })
+                        }
+                        className="cellar-bottle-modal-select"
+                      >
+                        {[...Array(9)].map((_, index) => (
+                          <MenuItem key={index + 1} value={String(index + 1)}>
+                            {index + 1}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                      <TextField
+                        select
+                        label="棚 列"
+                        size="small"
+                        value={String(editForm.column_number ?? bottle.column_number ?? "")}
+                        onChange={(e) =>
+                          onEditChange({
+                            ...editForm,
+                            column_number: e.target.value ? Number(e.target.value) : undefined,
+                          })
+                        }
+                        className="cellar-bottle-modal-select"
+                      >
+                        {[...Array(7)].map((_, index) => (
+                          <MenuItem key={index + 1} value={String(index + 1)}>
+                            {index + 1}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Stack>
+                  ) : (
+                    <span>
+                      {bottle.row_number}行 {bottle.column_number}列
+                    </span>
+                  )}
                 </p>
                 <p>
-                  開封 <span>{bottle.is_opened ? "済" : "未"}</span>
+                  開封
+                  <span className="cellar-bottle-modal-opened-value">
+                    <Switch
+                      checked={isEditing ? Boolean(editForm.is_opened) : bottle.is_opened}
+                      onChange={handleOpenedToggle}
+                      size="small"
+                      color="primary"
+                    />
+                    {isEditing ? (editForm.is_opened ? "済" : "未") : bottle.is_opened ? "済" : "未"}
+                  </span>
                 </p>
               </div>
+            </div>
+            <div className="cellar-bottle-modal-actions">
+              {isEditing ? (
+                <>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={async () => {
+                      await onEditSave(bottle.id, editForm);
+                      onClose();
+                    }}
+                  >
+                    保存
+                  </Button>
+                  <Button variant="outlined" size="small" onClick={onEditCancel}>
+                    キャンセル
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={handleEditStart}
+                >
+                  変更
+                </Button>
+              )}
             </div>
           </motion.div>
         </motion.div>
