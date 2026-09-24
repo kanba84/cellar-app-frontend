@@ -22,6 +22,8 @@ export interface Wine {
   wine_type_id: number;
   wine_type_name: string;
   vintage: number | null;
+  drinking_window_start: number | null;
+  drinking_window_end: number | null;
   region_id: number | null;
   region_name: string | null;
   producer: string | null;
@@ -45,6 +47,8 @@ export interface CreateWineRequest {
   wine_type_id: number;
   country_id: number;
   vintage?: number | null;
+  drinking_window_start?: number | null;
+  drinking_window_end?: number | null;
   region_id?: number | null;
   producer?: string | null;
   appellation_id?: number | null;
@@ -59,6 +63,8 @@ export interface UpdateWineRequest {
   wine_type_id?: number;
   country_id?: number;
   vintage?: number | null;
+  drinking_window_start?: number | null;
+  drinking_window_end?: number | null;
   region_id?: number | null;
   producer?: string | null;
   appellation_id?: number | null;

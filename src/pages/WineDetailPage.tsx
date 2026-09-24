@@ -127,6 +127,8 @@ function WineDetailPage() {
       "country_id",
       "region_id",
       "vintage",
+      "drinking_window_start",
+      "drinking_window_end",
       "appellation_id",
       "reference_price",
     ].includes(name)
@@ -156,10 +158,23 @@ function WineDetailPage() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
+    if (
+      editForm.drinking_window_start != null &&
+      editForm.drinking_window_start !== "" &&
+      editForm.drinking_window_end != null &&
+      editForm.drinking_window_end !== "" &&
+      Number(editForm.drinking_window_start) > Number(editForm.drinking_window_end)
+    ) {
+      setError("飲み頃開始年は終了年以前にしてください");
+      return;
+    }
+
     // 必要なフィールドだけを抽出
     const payload = {
       name: editForm.name || null,
       vintage: editForm.vintage ? Number(editForm.vintage) : null,
+      drinking_window_start: editForm.drinking_window_start ? Number(editForm.drinking_window_start) : null,
+      drinking_window_end: editForm.drinking_window_end ? Number(editForm.drinking_window_end) : null,
       wine_type_id: editForm.wine_type_id || null,
       country_id: editForm.country_id || null,
       region_id: editForm.region_id || null,
@@ -450,6 +465,18 @@ function WineDetailPage() {
                 >
                   ラベル画像を変更
                 </Typography>
+                <Typography sx={{ mb: 1, color: "#665E5E" }}>
+                  飲み頃:{" "}
+                  <Box component="span" sx={{ color: "#2C2C2C", fontWeight: 600 }}>
+                    {wine.drinking_window_start != null && wine.drinking_window_end != null
+                      ? `${wine.drinking_window_start}〜${wine.drinking_window_end}年`
+                      : wine.drinking_window_start != null
+                        ? `${wine.drinking_window_start}年〜`
+                        : wine.drinking_window_end != null
+                          ? `〜${wine.drinking_window_end}年`
+                          : "—"}
+                  </Box>
+                </Typography>
 
                 {/* 非表示のファイル入力 */}
                 <input
@@ -573,6 +600,24 @@ function WineDetailPage() {
                 name="vintage"
                 type="number"
                 value={editForm.vintage || ""}
+                onChange={handleChange}
+                variant="outlined"
+                sx={editFieldSx}
+              />
+              <TextField
+                label="飲み頃開始年"
+                name="drinking_window_start"
+                type="number"
+                value={editForm.drinking_window_start ?? ""}
+                onChange={handleChange}
+                variant="outlined"
+                sx={editFieldSx}
+              />
+              <TextField
+                label="飲み頃終了年"
+                name="drinking_window_end"
+                type="number"
+                value={editForm.drinking_window_end ?? ""}
                 onChange={handleChange}
                 variant="outlined"
                 sx={editFieldSx}

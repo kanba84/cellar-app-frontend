@@ -16,6 +16,8 @@ export function useWineWithBottleForm(): UseWineWithBottleFormReturn {
     wine: {
       name: '',
       vintage: '',
+      drinking_window_start: '',
+      drinking_window_end: '',
       wine_type_id: '',
       country_id: '',
       region_id: '',
@@ -39,6 +41,8 @@ export function useWineWithBottleForm(): UseWineWithBottleFormReturn {
       wine: {
         name: '',
         vintage: '',
+        drinking_window_start: '',
+        drinking_window_end: '',
         wine_type_id: '',
         country_id: '',
         region_id: '',
@@ -73,6 +77,8 @@ export function useWineWithBottleForm(): UseWineWithBottleFormReturn {
         wine: {
           name: wine.name,
           vintage: wine.vintage ? Number(wine.vintage) : null,
+          drinking_window_start: wine.drinking_window_start ? Number(wine.drinking_window_start) : null,
+          drinking_window_end: wine.drinking_window_end ? Number(wine.drinking_window_end) : null,
           wine_type_id: wine.wine_type_id ? Number(wine.wine_type_id) : null,
           country_id: wine.country_id ? Number(wine.country_id) : null,
           region_id: wine.region_id ? Number(wine.region_id) : null,
