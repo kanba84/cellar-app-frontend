@@ -9,6 +9,8 @@
 export interface WineFormState {
   name: string;
   vintage: string | number | '';
+  drinking_window_start: string | number | '';
+  drinking_window_end: string | number | '';
   wine_type_id: string | number | '';
   country_id: string | number | '';
   region_id: string | number | '';
@@ -24,6 +26,8 @@ export interface WineFormState {
 export interface WineFormSubmitData {
   name: string;
   vintage: number | null;
+  drinking_window_start: number | null;
+  drinking_window_end: number | null;
   wine_type_id: number | null;
   country_id: number | null;
   region_id: number | null;
@@ -37,6 +41,8 @@ export interface WineFormSubmitData {
 export interface WineFormErrors {
   name?: string;
   vintage?: string;
+  drinking_window_start?: string;
+  drinking_window_end?: string;
   wine_type_id?: string;
   country_id?: string;
   region_id?: string;
