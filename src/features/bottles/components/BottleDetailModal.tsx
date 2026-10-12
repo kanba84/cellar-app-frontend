@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Button, MenuItem, Stack, Switch, TextField } from "@mui/material";
 import wineTypeColor, { wineTypeColorLight } from "@/utils/wineUtils";
 import { buildImageUrl } from "@/utils/imageUtils";
+import { MAX_CELLAR_ROWS } from "@/types/domain/cellar";
 import type { Bottle } from "@/types/api/bottle";
 import type { Wine } from "@/types/api/wine";
 import "./BottleDetailModal.css";
@@ -189,7 +190,7 @@ function BottleDetailModal({
                         }
                         className="cellar-bottle-modal-select"
                       >
-                        {[...Array(9)].map((_, index) => (
+                        {Array.from({ length: MAX_CELLAR_ROWS }, (_, index) => (
                           <MenuItem key={index + 1} value={String(index + 1)}>
                             {index + 1}
                           </MenuItem>

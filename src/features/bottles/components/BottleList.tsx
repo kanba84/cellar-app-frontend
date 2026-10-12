@@ -39,10 +39,6 @@ function BottleList({
   const { rowGroups, sortedRows, openRows, toggleRow } =
     useBottleListViewModel(bottles);
 
-  if (bottles.length === 0) {
-    return <Typography>登録されているボトルはありません。</Typography>;
-  }
-
   return (
     <Box
       component="div"
@@ -53,6 +49,11 @@ function BottleList({
         overflow: "hidden",
       }}
     >
+      {bottles.length === 0 && (
+        <Typography sx={{ px: 2, py: 1 }}>
+          登録されているボトルはありません。
+        </Typography>
+      )}
       <List sx={{ p: 0 }}>
         {sortedRows.map((row) => {
           const bottlesInRow = rowGroups[row];

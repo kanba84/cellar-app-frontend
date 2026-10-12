@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Box, IconButton, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import type { Bottle } from '@/types/api/bottle';
+import { MAX_CELLAR_ROWS } from '@/types/domain/cellar';
 import './CellarVisualizer.css';
 
-/** BottleItem の棚 UI と同じ（行 1–9、列 1–7） */
-const SHELF_ROW_COUNT = 9;
+/** BottleItem の棚 UI と同じ（行 1–10、列 1–7） */
+const SHELF_ROW_COUNT = MAX_CELLAR_ROWS;
 const SHELF_COL_COUNT = 7;
 
 function getWineVisualClass(bottle: Bottle | null): string {

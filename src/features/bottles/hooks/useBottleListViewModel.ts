@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Bottle } from '@/types/api/bottle';
+import { MAX_CELLAR_ROWS } from '@/types/domain/cellar';
 import type { UseBottleListViewModelReturn } from '@/types/hook/bottle';
 
 /**
@@ -7,7 +8,7 @@ import type { UseBottleListViewModelReturn } from '@/types/hook/bottle';
  */
 export function useBottleListViewModel(bottles: Bottle[]): UseBottleListViewModelReturn {
   // グループ化
-  const rowGroups = bottles.reduce<Record<string | number, Bottle[]>>((acc, bottle) => {
+  const groupedBottles = bottles.reduce<Record<string | number, Bottle[]>>((acc, bottle) => {
     const row = bottle.row_number;
     if (row === null || row === undefined) return acc;
     if (!acc[row]) acc[row] = [];
@@ -15,20 +16,20 @@ export function useBottleListViewModel(bottles: Bottle[]): UseBottleListViewMode
     return acc;
   }, {});
 
-  const sortedRows = Object.keys(rowGroups)
-    .sort((a, b) => Number(a) - Number(b))
-    .map((row) => (isNaN(Number(row)) ? row : Number(row)));
+  const sortedRows = Array.from({ length: MAX_CELLAR_ROWS }, (_, index) => index + 1);
+  const rowGroups = Object.fromEntries(
+    sortedRows.map((row) => [row, groupedBottles[row] ?? []])
+  );
 
   // 開閉状態
-  const [openRows, setOpenRows] = useState<Record<string | number, boolean>>(
-    Object.fromEntries(sortedRows.map((row) => [row, true]))
-  );
+  const defaultOpenRows = Object.fromEntries(sortedRows.map((row) => [row, true]));
+  const [openRows, setOpenRows] = useState<Record<string | number, boolean>>(defaultOpenRows);
 
   useEffect(() => {
     const saved = sessionStorage.getItem('bottleListOpenRows');
     if (saved) {
       const parsed = JSON.parse(saved) as Record<string | number, boolean>;
-      setOpenRows(parsed);
+      setOpenRows({ ...defaultOpenRows, ...parsed });
     }
   }, []);
 
