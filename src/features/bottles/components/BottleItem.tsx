@@ -12,6 +12,7 @@ import { buildImageUrl } from "@/utils/imageUtils";
 import "flag-icons/css/flag-icons.min.css";
 import MenuItem from "@mui/material/MenuItem";
 import type { Bottle } from "@/types/api/bottle";
+import { MAX_CELLAR_ROWS } from "@/types/domain/cellar";
 
 interface BottleItemProps {
   bottle: Bottle;
@@ -199,7 +200,7 @@ function BottleItem({
               }
               sx={editFieldSx}
             >
-              {[...Array(9)].map((_, i) => (
+              {Array.from({ length: MAX_CELLAR_ROWS }, (_, i) => (
                 <MenuItem key={i + 1} value={String(i + 1)}>
                   {i + 1}
                 </MenuItem>

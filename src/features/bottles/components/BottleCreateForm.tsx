@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import type { Wine } from "@/types/api/wine";
 import type { BottleFormState } from "@/types/form/bottle";
+import { MAX_CELLAR_ROWS } from "@/types/domain/cellar";
 
 interface BottleCreateFormProps {
   form: BottleFormState;
@@ -118,7 +119,7 @@ function BottleCreateForm({
           InputProps={{ sx: { fontSize: inputFontSize } }}
           InputLabelProps={{ sx: { fontSize: inputFontSize } }}
         >
-          {[...Array(9)].map((_, i) => (
+          {Array.from({ length: MAX_CELLAR_ROWS }, (_, i) => (
             <MenuItem key={i + 1} value={String(i + 1)}>
               {i + 1}
             </MenuItem>

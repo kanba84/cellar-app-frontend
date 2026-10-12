@@ -4,6 +4,8 @@
 
 import type { Bottle } from '../api/bottle';
 
+export const MAX_CELLAR_ROWS = 10;
+
 /**
  * セラー内の1つのスロット
  */
@@ -24,7 +26,7 @@ export interface CellarShelf {
  * Cellar グリッドの構成
  */
 export interface CellarGrid {
-  rows: number;    // 9
+  rows: typeof MAX_CELLAR_ROWS;
   columns: number; // 7
   shelves: CellarShelf[];
 }
