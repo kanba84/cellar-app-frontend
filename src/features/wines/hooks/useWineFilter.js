@@ -1,4 +1,8 @@
 import { useReducer, useMemo } from "react";
+import {
+  getAppellationIdsForRegions,
+  getRegionAndDescendantIds,
+} from "../utils/regionTree";
 
 const initialFilters = {
   type: "",
@@ -27,17 +31,30 @@ const filterReducer = (state, action) => {
   }
 };
 
-export function useWineFilter(wines = []) {
+export function useWineFilter(wines = [], regions = [], appellations = []) {
   const [filters, dispatch] = useReducer(filterReducer, initialFilters);
 
   // useMemo を使ってフィルタ結果をメモ化
   // wines と filter条件が変わった時だけ再計算する
   const filteredWines = useMemo(() => {
+    const regionIds = filters.region
+      ? getRegionAndDescendantIds(regions, Number(filters.region))
+      : null;
+    const appellationIds = regionIds
+      ? getAppellationIdsForRegions(appellations, regionIds)
+      : null;
+
     return wines.filter((wine) => {
       let ok = true;
       if (filters.type) ok = ok && wine.wine_type_name === filters.type;
       if (filters.country) ok = ok && wine.country_name === filters.country;
-      if (filters.region) ok = ok && wine.region_name === filters.region;
+      if (regionIds) {
+        ok =
+          ok &&
+          ((wine.region_id != null && regionIds.has(Number(wine.region_id))) ||
+            (wine.appellation_id != null &&
+              appellationIds?.has(Number(wine.appellation_id))));
+      }
       if (filters.name) {
         ok = ok && wine.name.toLowerCase().includes(filters.name.toLowerCase());
       }
@@ -45,7 +62,7 @@ export function useWineFilter(wines = []) {
       if (filters.stock === "out") ok = ok && wine.has_stock === false;
       return ok;
     });
-  }, [wines, filters]);
+  }, [wines, regions, appellations, filters]);
 
   const setFilterType = (value) =>
     dispatch({ type: "SET_TYPE", payload: value });

@@ -10,9 +10,11 @@ import type { Country } from './country';
 export interface Region {
   id: number;
   name: string;
+  code?: string | null;
   country_id: number;
   country?: Country;
   parent_id: number | null;  // 親地域のID
+  sort_order: number;
 }
 
 /**
@@ -22,6 +24,8 @@ export interface CreateRegionRequest {
   name: string;
   country_id: number | null;
   parent_id?: number | null;
+  code?: string | null;
+  sort_order?: number;
 }
 
 /**
@@ -31,4 +35,6 @@ export interface UpdateRegionRequest {
   name?: string;
   country_id?: number;
   parent_id?: number | null;
+  code?: string | null;
+  sort_order?: number;
 }
