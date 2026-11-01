@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchWines } from "../api/wineApi";
+import { fetchRegions } from "../api/regionApi";
+import { fetchAppellations } from "../api/appellationApi";
 import { useWineFilter } from "../features/wines/hooks/useWineFilter";
 import WineFilter from "../features/wines/components/WineFilter";
+import { getRegionLabel } from "../features/wines/utils/regionTree";
 import wineTypeColor from "../utils/wineUtils";
 import Typography from "@mui/material/Typography";
 import List from "@mui/material/List";
@@ -17,6 +20,8 @@ import "flag-icons/css/flag-icons.min.css";
 
 function WineListPage() {
   const [wines, setWines] = useState<any[]>([]);
+  const [regions, setRegions] = useState<any[]>([]);
+  const [appellations, setAppellations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
 
@@ -32,16 +37,24 @@ function WineListPage() {
     setFilterStock,
     filteredWines: filteredWinesRaw,
     resetFilters,
-  } = useWineFilter(wines);
+  } = useWineFilter(wines, regions, appellations);
   
   const filteredWines: any[] = (filteredWinesRaw as any[]) || [];
 
   useEffect(() => {
-    fetchWines()
-      .then((data) => {
-        setWines(Array.isArray(data) ? data : []);
+    Promise.all([fetchWines(), fetchRegions(), fetchAppellations()])
+      .then(([wineData, regionData, appellationData]) => {
+        setWines(Array.isArray(wineData) ? wineData : []);
+        const allRegions = Array.isArray(regionData) ? regionData : [];
+        setRegions(
+          allRegions.map((region) => ({
+            ...region,
+            label: getRegionLabel(region, allRegions),
+          })),
+        );
+        setAppellations(Array.isArray(appellationData) ? appellationData : []);
       })
-      .catch(() => setError("ワイン一覧の取得に失敗しました"))
+      .catch(() => setError("ワインまたは産地マスターの取得に失敗しました"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -70,6 +83,7 @@ function WineListPage() {
         setFilterStock,
         resetFilters,
         wines,
+        regions,
         isMobile,
       })}</div>
 

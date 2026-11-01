@@ -9,6 +9,7 @@ function WineFilter({
   setFilterStock,
   resetFilters,
   wines = [],
+  regions = [],
   isMobile,
 }) {
   // FilterPanel用の統一的な onChange ハンドラ
@@ -66,9 +67,10 @@ function WineFilter({
       type: "select",
       options: [
         { label: "すべて", value: "" },
-        ...[...new Set(wines.map((w) => w.region_name).filter(Boolean))].map(
-          (region) => ({ label: region, value: region })
-        ),
+        ...regions.map((region) => ({
+          label: region.label,
+          value: String(region.id),
+        })),
       ],
       sx: { minWidth: 120 },
     },
